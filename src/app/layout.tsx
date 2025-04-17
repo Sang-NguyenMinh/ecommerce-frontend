@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "next-themes";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
+import TanstackProvider from "../libs/TanstackProvider";
+import ReduxProvider from "../libs/ReduxProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,11 +27,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    //check suppressHydrationWarning
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <style>@layer xxx, antd;</style>
+        <style>@layer antd {/** ... */}</style>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ReduxProvider>
+            <TanstackProvider>
+              <AntdRegistry>{children}</AntdRegistry>
+            </TanstackProvider>
+          </ReduxProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
