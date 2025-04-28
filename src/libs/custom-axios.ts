@@ -27,7 +27,10 @@ axiosInstance.interceptors.request.use(
         console.log(extractResponseError(err));
       }
 
-      config.headers["Content-Type"] = "application/json";
+      if (!(config.data instanceof FormData)) {
+        config.headers["Content-Type"] = "application/json";
+      }
+
       config.headers["Accept"] = "application/json";
     }
 

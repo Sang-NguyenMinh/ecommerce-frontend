@@ -15,3 +15,15 @@ export interface ICreateCategory {
   parentCategory?: string;
   status: boolean;
 }
+
+export interface ICreateProduct {
+  productName: string;
+  thumbnails: File[];
+  categoryId: string;
+}
+
+export interface IUpdateCategory {
+  categoryName?: string;
+  parentCategory?: string;
+  status?: boolean;
+}

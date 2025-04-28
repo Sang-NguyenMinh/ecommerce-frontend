@@ -25,6 +25,8 @@ export default function DashboardSideMenu() {
       setSelectedKey(["8"]);
     } else if (pathname.startsWith("/configurations")) {
       setSelectedKey(["9"]);
+    } else if (pathname.startsWith("/product-item")) {
+      setSelectedKey(["10"]);
     } else if (pathname === "/dashboard") {
       setSelectedKey(["1"]);
     }
@@ -45,6 +47,10 @@ export default function DashboardSideMenu() {
     { label: <Link href="/dashboard/users">Khách hàng</Link>, key: "7" },
     { label: <Link href="/dashboard/reviews">Đánh giá</Link>, key: "8" },
     { label: <Link href="/dashboard/configurations">Cấu hình</Link>, key: "9" },
+    {
+      label: <Link href="/dashboard/product-item">Chi tiết sản phẩm</Link>,
+      key: "10",
+    },
   ];
 
   return (

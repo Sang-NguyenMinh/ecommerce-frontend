@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import TanstackProvider from "../libs/TanstackProvider";
 import ReduxProvider from "../libs/ReduxProvider";
+import "@ant-design/v5-patch-for-react-19";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
