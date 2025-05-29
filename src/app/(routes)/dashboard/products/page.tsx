@@ -39,6 +39,7 @@ interface DataType {
   content?: string;
   category?: string;
 }
+import LexicalEditorWrapper from "@/components/LexicalEditorWrapper";
 
 export default function Category() {
   const { data: productRes, isLoading } = useProducts();
@@ -172,8 +173,10 @@ export default function Category() {
       }
     });
   };
-  const handleDelete = () => {
-    deleteProduct(selectedProduct?.id ?? "");
+  const handleDelete = async () => {
+    console.log("xoaaaaaaaaaaaaaa")
+    console.log(selectedProduct?.id);
+    await deleteProduct(selectedProduct?.id ?? "");
     setIsDeleteModalVisible(false);
   };
 
@@ -215,7 +218,7 @@ export default function Category() {
           <PlusCircleOutlined className="text-4xl !text-green-500 " />
         </Card>
       </div>
-
+        <LexicalEditorWrapper />
       <Table
         className="mt-4 w-full"
         columns={columns}

@@ -1,8 +1,5 @@
-import { NextPageContext } from "next";
 import { isEmpty } from "lodash";
-import Router from "next/router";
 import axios from "axios";
-import { FB_CFG } from "@io/configs/config";
 
 const DEFAULT_TIMESTAMP = 1;
 const DEFAULT_TIME_PATTERN = "HH:mm:ss";

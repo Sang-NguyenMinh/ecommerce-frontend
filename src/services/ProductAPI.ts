@@ -2,9 +2,6 @@ import { API_URL } from "libs/env";
 import { axios } from "../libs/custom-axios";
 import {
   IBaseQuery,
-  ICreateCategory,
-  ICreateProduct,
-  IUpdateCategory,
 } from "@/configs/types";
 
 const PRODUCT_URL = `${API_URL}/product`;

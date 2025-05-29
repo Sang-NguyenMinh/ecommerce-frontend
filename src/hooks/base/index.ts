@@ -22,7 +22,7 @@ export const useFetchList = (
 ) => {
   return useQuery({
     ...options,
-    queryKey: key,
+    queryKey: [...key, params], 
     queryFn: async () => {
       const res = await api.getAll?.(params);
       return res?.data;
