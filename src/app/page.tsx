@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../redux/store";
-import { authBegin, authFailure, authSuccess } from "../redux/authSlice";
-import { AuthAPI } from "services/AuthAPI";
-import { IToken } from "configs/custom-types";
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../redux/store';
+import { authBegin, authFailure, authSuccess } from '../redux/authSlice';
+import { AuthAPI } from 'services/AuthAPI';
+import { IToken } from 'configs/custom-types';
 import {
   getUserBegin,
   getUserFailure,
   getUserSuccess,
-} from "../redux/userSlice";
-import UserAPI from "services/UserAPI";
+} from '../redux/userSlice';
+import UserAPI from 'services/UserAPI';
 
 export default function Home() {
   const { phone } = useAppSelector((state) => state.user);
@@ -18,7 +18,7 @@ export default function Home() {
 
   useEffect(() => {
     const login = async () => {
-      await AuthAPI.logIn("Admin@gmail.com", "Admin@gmail.com")
+      await AuthAPI.logIn('Admin@gmail.com', 'Admin@gmail.com')
         .then(async (resp) => {
           dispatch(authBegin());
           const token: IToken = resp.data;
@@ -28,7 +28,7 @@ export default function Home() {
           const userResp = await UserAPI.getUser();
           dispatch(getUserSuccess(userResp.data));
         })
-        .catch((err) => {
+        .catch(() => {
           dispatch(authFailure());
           dispatch(getUserFailure());
         });

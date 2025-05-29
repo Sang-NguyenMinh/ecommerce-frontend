@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useCategories } from "@/hooks/category";
+import { useCategories } from '@/hooks/category';
 import {
   CrownOutlined,
   PlusCircleOutlined,
   UploadOutlined,
-} from "@ant-design/icons";
+} from '@ant-design/icons';
 import {
   Card,
   Form,
@@ -17,19 +17,19 @@ import {
   Typography,
   Upload,
   UploadFile,
-} from "antd";
-import { ColumnsType } from "antd/es/table";
-import { useColumnSearch } from "@/hooks/utils/useColumnSearch";
-import { useState } from "react";
+} from 'antd';
+import { ColumnsType } from 'antd/es/table';
+import { useColumnSearch } from '@/hooks/utils/useColumnSearch';
+import { useState } from 'react';
 import {
   useCreateProduct,
   useDeleteProduct,
   useProducts,
   useUpdateProduct,
-} from "@/hooks/product";
+} from '@/hooks/product';
 const { Title } = Typography;
-import RichTextEditor from "@/components/rich-text-editor";
-import { Storage } from "@/libs/storage";
+import { Storage } from '@/libs/storage';
+import RichTextEditor from '@/components/rich-text-editor';
 interface DataType {
   key: string;
   id: string;
@@ -39,7 +39,6 @@ interface DataType {
   content?: string;
   category?: string;
 }
-import LexicalEditorWrapper from "@/components/LexicalEditorWrapper";
 
 export default function Category() {
   const { data: productRes, isLoading } = useProducts();
@@ -56,34 +55,34 @@ export default function Category() {
 
   const isMutating = isCreating || isUpdating;
 
-  const [editorContent, setEditorContent] = useState("");
-  console.log(Storage.Cookie.get("token"));
+  const [editorContent, setEditorContent] = useState('');
+  console.log(Storage.Cookie.get('token'));
   const columns: ColumnsType<DataType> = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      width: "15%",
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: '15%',
     },
     {
-      title: "Tên sản phẩm",
-      dataIndex: "productName",
-      key: "productName",
-      width: "25%",
-      ...getColumnSearchProps("productName"),
+      title: 'Tên sản phẩm',
+      dataIndex: 'productName',
+      key: 'productName',
+      width: '25%',
+      ...getColumnSearchProps('productName'),
     },
     {
-      title: "Danh mục",
-      dataIndex: "categoryName",
-      key: "categoryName",
-      width: "20%",
-      ...getColumnSearchProps("categoryName"),
+      title: 'Danh mục',
+      dataIndex: 'categoryName',
+      key: 'categoryName',
+      width: '20%',
+      ...getColumnSearchProps('categoryName'),
     },
     {
-      title: "Ảnh mẫu",
-      dataIndex: "thumbnail",
-      key: "thumbnails",
-      width: "15%",
+      title: 'Ảnh mẫu',
+      dataIndex: 'thumbnail',
+      key: 'thumbnails',
+      width: '15%',
       render: (_, record) => (
         <img
           src={record.thumbnails?.[0]}
@@ -94,9 +93,9 @@ export default function Category() {
     },
 
     {
-      title: "Action",
-      key: "action",
-      width: "10%",
+      title: 'Action',
+      key: 'action',
+      width: '10%',
       render: (_, record) => (
         <Space size="middle">
           <a
@@ -108,9 +107,9 @@ export default function Category() {
                   record.thumbnails.map((url, index) => ({
                     uid: `${index}`,
                     name: `thumbnail-${index}.png`,
-                    status: "done",
+                    status: 'done',
                     url,
-                  }))
+                  })),
                 );
               }
 
@@ -140,22 +139,22 @@ export default function Category() {
   const handleModalSubmit = async () => {
     form.validateFields().then((values) => {
       const formData = new FormData();
-      formData.append("productName", values.productName || "");
-      formData.append("categoryId", values.category || "");
-      formData.append("content", editorContent || "");
+      formData.append('productName', values.productName || '');
+      formData.append('categoryId', values.category || '');
+      formData.append('content', editorContent || '');
 
       fileList.forEach((file: any) => {
-        formData.append("thumbnails", file.originFileObj);
+        formData.append('thumbnails', file.originFileObj);
       });
 
-      console.log("FormData entries:");
+      console.log('FormData entries:');
       for (const pair of formData.entries()) {
         console.log(pair[0], pair[1]);
       }
 
       const onSuccess = () => {
         console.log(
-          isEditing ? "Update product success" : "Create product success"
+          isEditing ? 'Update product success' : 'Create product success',
         );
         setIsModalVisible(false);
         form.resetFields();
@@ -165,8 +164,8 @@ export default function Category() {
 
       if (isEditing) {
         updateProduct(
-          { id: selectedProduct?.id ?? "", data: formData },
-          { onSuccess }
+          { id: selectedProduct?.id ?? '', data: formData },
+          { onSuccess },
         );
       } else {
         createProduct(formData, { onSuccess });
@@ -174,9 +173,8 @@ export default function Category() {
     });
   };
   const handleDelete = async () => {
-    console.log("xoaaaaaaaaaaaaaa")
     console.log(selectedProduct?.id);
-    await deleteProduct(selectedProduct?.id ?? "");
+    await deleteProduct(selectedProduct?.id ?? '');
     setIsDeleteModalVisible(false);
   };
 
@@ -186,7 +184,7 @@ export default function Category() {
     key: item._id,
     id: item._id,
     productName: item.productName,
-    categoryName: item.categoryId?.categoryName || "Không có",
+    categoryName: item.categoryId?.categoryName || 'Không có',
     content: item.content,
     thumbnails: item.thumbnails,
     category: item.categoryId?._id,
@@ -218,7 +216,6 @@ export default function Category() {
           <PlusCircleOutlined className="text-4xl !text-green-500 " />
         </Card>
       </div>
-        <LexicalEditorWrapper />
       <Table
         className="mt-4 w-full"
         columns={columns}
@@ -230,17 +227,17 @@ export default function Category() {
       <Modal
         confirmLoading={isMutating}
         className="!w-[60%] !h-[60%]"
-        title={isEditing ? "Chỉnh sửa sản phẩm" : "Tạo sản phẩm mới"}
+        title={isEditing ? 'Chỉnh sửa sản phẩm' : 'Tạo sản phẩm mới'}
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         onOk={handleModalSubmit}
-        okText={isEditing ? "Cập nhật" : "Tạo"}
+        okText={isEditing ? 'Cập nhật' : 'Tạo'}
       >
         <Form form={form} layout="vertical">
           <Form.Item
             label="Tên sản phẩm"
             name="productName"
-            rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm" }]}
+            rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm' }]}
           >
             <Input size="large" />
           </Form.Item>
@@ -248,7 +245,7 @@ export default function Category() {
           <Form.Item
             label="Danh mục"
             name="category"
-            rules={[{ required: true, message: "Vui lòng chọn danh mục" }]}
+            rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}
           >
             <Select size="large" allowClear placeholder="Chọn danh mục">
               {categoriesRes?.categories?.map((cat: any) => (
@@ -269,7 +266,7 @@ export default function Category() {
           <Form.Item
             label="Thumbnail"
             required
-            rules={[{ required: true, message: "Vui lòng tải ảnh sản phẩm" }]}
+            rules={[{ required: true, message: 'Vui lòng tải ảnh sản phẩm' }]}
           >
             <Upload
               fileList={fileList}
@@ -297,7 +294,7 @@ export default function Category() {
         cancelText="Hủy"
       >
         <p>
-          Bạn có chắc chắn muốn xóa sản phẩm{" "}
+          Bạn có chắc chắn muốn xóa sản phẩm{' '}
           <strong>{selectedProduct?.productName}</strong> không?
         </p>
       </Modal>
