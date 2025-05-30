@@ -1,5 +1,16 @@
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "";
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
-const MEDIA_URL = process.env.NEXT_PUBLIC_MEDIA_URL || "";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || '';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const MEDIA_URL = process.env.NEXT_PUBLIC_MEDIA_URL || '';
 
-export { SITE_URL, API_URL, MEDIA_URL };
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || '';
+const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || '';
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || '';
+
+export {
+  SITE_URL,
+  API_URL,
+  MEDIA_URL,
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET,
+};

@@ -19,3 +19,15 @@ body {
   background-color: rgb(var(--background));
   color: rgb(var(--foreground));
 }
+
+@layer base {
+  h1 {
+    @apply text-2xl font-bold;
+  }
+  h2 {
+    @apply text-xl font-bold;
+  }
+  h3 {
+    @apply text-lg font-bold;
+  }
+}

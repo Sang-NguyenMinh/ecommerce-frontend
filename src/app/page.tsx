@@ -22,7 +22,7 @@ export default function Home() {
         .then(async (resp) => {
           dispatch(authBegin());
           const token: IToken = resp.data;
-          console.log(token);
+          console.log('tokennnnnn', resp);
           dispatch(authSuccess({ token }));
           dispatch(getUserBegin());
           const userResp = await UserAPI.getUser();

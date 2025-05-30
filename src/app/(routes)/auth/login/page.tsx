@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { Button, Input, Form, Divider, Image } from "antd";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { AuthAPI } from "services/AuthAPI";
-import { useAppDispatch } from "@/redux/store";
-import { authBegin, authFailure, authSuccess } from "@/redux/authSlice";
-import { IToken } from "configs/custom-types";
+import { Button, Input, Form, Divider, Image } from 'antd';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { AuthAPI } from 'services/AuthAPI';
+import { useAppDispatch } from '@/redux/store';
+import { authBegin, authFailure, authSuccess } from '@/redux/authSlice';
+import { IToken } from 'configs/custom-types';
 import {
   getUserBegin,
   getUserFailure,
   getUserSuccess,
-} from "@/redux/userSlice";
-import UserAPI from "services/UserAPI";
+} from '@/redux/userSlice';
+import UserAPI from 'services/UserAPI';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,9 +35,10 @@ export default function LoginPage() {
         const userResp = await UserAPI.getUser();
         dispatch(getUserSuccess(userResp.data));
 
-        router.push("/");
+        router.push('/');
       })
       .catch((err) => {
+        console.error('Login failed:', err);
         dispatch(authFailure());
         dispatch(getUserFailure());
       });
@@ -56,8 +57,8 @@ export default function LoginPage() {
           <Form.Item
             name="email"
             rules={[
-              { required: true, message: "Vui lòng nhập email của bạn!" },
-              { type: "email", message: "Email không hợp lệ!" },
+              { required: true, message: 'Vui lòng nhập email của bạn!' },
+              { type: 'email', message: 'Email không hợp lệ!' },
             ]}
           >
             <Input size="large" placeholder="Email" />
@@ -65,7 +66,7 @@ export default function LoginPage() {
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
           >
             <Input.Password size="large" placeholder="Mật khẩu" />
           </Form.Item>

@@ -7,6 +7,7 @@ import {
   Heading2,
   Heading3,
   Highlighter,
+  ImagePlus,
   Italic,
   List,
   ListOrdered,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Toggle } from '../ui/toggle';
 import { Editor } from '@tiptap/react';
+import { useCallback } from 'react';
 
 export default function MenuBar({ editor }: { editor: Editor | null }) {
   if (!editor) {

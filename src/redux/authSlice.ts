@@ -1,11 +1,11 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { AppDispatch, AppThunk, RootState } from "./store";
-import { IToken, ITokenPayload } from "configs/custom-types";
-import { Storage } from "libs/storage";
-import { getUserBegin, getUserFailure, getUserSuccess } from "./userSlice";
-import UserAPI from "services/UserAPI";
-import { extractResponseError } from "libs/utils";
+import { AppDispatch, AppThunk } from './store';
+import { IToken, ITokenPayload } from 'configs/custom-types';
+import { Storage } from 'libs/storage';
+import { getUserBegin, getUserFailure, getUserSuccess } from './userSlice';
+import UserAPI from 'services/UserAPI';
+import { extractResponseError } from 'libs/utils';
 
 export interface IAuthState {
   isLoggedIn: boolean;
@@ -38,7 +38,7 @@ const initialState: IAuthState = {
 };
 
 const auth = createSlice({
-  name: "auth",
+  name: 'auth',
   initialState,
   reducers: {
     authBegin(state: IAuthState) {
@@ -46,11 +46,11 @@ const auth = createSlice({
     },
     authSuccess(state: IAuthState, action: PayloadAction<{ token: IToken }>) {
       const { token } = action.payload;
-      const tokenParts = token.accessToken.split(".");
-      if (tokenParts.length !== 3) throw new Error("Invalid token!");
+      const tokenParts = token.accessToken.split('.');
+      if (tokenParts.length !== 3) throw new Error('Invalid token!');
 
       const tokenData: IAccessToken = JSON.parse(
-        Buffer.from(tokenParts[1], "base64").toString("utf-8")
+        Buffer.from(tokenParts[1], 'base64').toString('utf-8'),
       );
 
       state.isLoading = false;
@@ -58,7 +58,7 @@ const auth = createSlice({
 
       for (const key in tokenData) state[key] = tokenData[key];
 
-      Storage.Cookie.set("token", token, 365);
+      Storage.Cookie.set('token', token, 365);
     },
     authFailure(state: IAuthState) {
       state.isLoggedIn = false;
@@ -79,7 +79,7 @@ const logIn = (): AppThunk => async (dispatch, getState) => {
 
   if (isLoading) return;
 
-  const token = Storage.Cookie.get<IToken>("token");
+  const token = Storage.Cookie.get<IToken>('token');
 
   if (!!token) {
     try {
@@ -87,7 +87,7 @@ const logIn = (): AppThunk => async (dispatch, getState) => {
 
       dispatch(getUserBegin());
       const response = await UserAPI.getUser(
-        [token.type, token.accessToken].join(" ")
+        [token.type, token.accessToken].join(' '),
       );
       dispatch(getUserSuccess(response.data));
     } catch (err) {
@@ -100,7 +100,7 @@ const logIn = (): AppThunk => async (dispatch, getState) => {
 };
 
 const logOut = () => async (dispatch: AppDispatch) => {
-  Storage.Cookie.remove("token");
+  Storage.Cookie.remove('token');
   dispatch(getUserFailure());
   dispatch(authFailure());
 };
