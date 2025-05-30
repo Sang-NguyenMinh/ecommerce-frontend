@@ -260,6 +260,7 @@ export default function Category() {
             <RichTextEditor
               content={editorContent}
               onChange={setEditorContent}
+              uploadPreset="tiptap_image" // your upload preset name
             />
           </Form.Item>
 
