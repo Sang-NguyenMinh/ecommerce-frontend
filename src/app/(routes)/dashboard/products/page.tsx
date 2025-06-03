@@ -1,304 +1,860 @@
 'use client';
 
-import { useCategories } from '@/hooks/category';
+import React, { useState, useCallback, useMemo, use, useEffect } from 'react';
 import {
-  CrownOutlined,
-  PlusCircleOutlined,
-  UploadOutlined,
-} from '@ant-design/icons';
-import {
-  Card,
   Form,
   Input,
-  Modal,
   Select,
   Space,
-  Table,
   Typography,
-  Upload,
-  UploadFile,
+  Tag,
+  Tabs,
+  InputNumber,
+  Drawer,
+  Image,
+  Row,
+  Col,
+  Badge,
+  Button,
+  message,
 } from 'antd';
-import { ColumnsType } from 'antd/es/table';
-import { useColumnSearch } from '@/hooks/utils/useColumnSearch';
-import { useState } from 'react';
 import {
-  useCreateProduct,
+  PlusOutlined,
+  ShoppingOutlined,
+  TagOutlined,
+  BgColorsOutlined,
+  AppstoreOutlined,
+  BarChartOutlined,
+  PlusCircleOutlined,
+} from '@ant-design/icons';
+import {
+  ActionButton,
+  ActionButtons,
+  CustomModal,
+  CustomTable,
+  ImageUpload,
+  PageHeader,
+  StatisticItem,
+  StatisticsCards,
+  useModal,
+} from './component/custom';
+import {
   useDeleteProduct,
   useProducts,
+  useCreateProduct,
   useUpdateProduct,
 } from '@/hooks/product';
-const { Title } = Typography;
-import { Storage } from '@/libs/storage';
+import { useCategories } from '@/hooks/category';
 import RichTextEditor from '@/components/rich-text-editor';
-interface DataType {
-  key: string;
-  id: string;
-  productName: string;
-  categoryName: string;
-  thumbnails: string[];
-  content?: string;
-  category?: string;
-}
+import { Storage } from '@/libs/storage';
 
-export default function Category() {
+const { Text } = Typography;
+const { Option } = Select;
+const { TabPane } = Tabs;
+
+const mockVariationOptions = {
+  var1: [
+    { _id: 'opt1', value: 'S', variationId: 'var1' },
+    { _id: 'opt2', value: 'M', variationId: 'var1' },
+  ],
+  var2: [
+    { _id: 'opt5', value: 'Đỏ', variationId: 'var2', color: '#ff0000' },
+    { _id: 'opt6', value: 'Xanh', variationId: 'var2', color: '#0000ff' },
+  ],
+};
+
+const mockProductItems = [
+  {
+    _id: 'item1',
+    productId: '1',
+    SKU: 'TSN-001-S-RED',
+    price: 299000,
+    qtyInStock: 25,
+    images: ['https://via.placeholder.com/300x300/ff0000'],
+    configurations: [
+      {
+        variationOptionId: 'opt1',
+        variationOption: { value: 'S', color: null },
+      },
+      {
+        variationOptionId: 'opt5',
+        variationOption: { value: 'Đỏ', color: '#ff0000' },
+      },
+    ],
+  },
+];
+
+const ProductManagement = () => {
+  const [form] = Form.useForm();
+  const [variantForm] = Form.useForm();
+  const [productItems, setProductItems] = useState(mockProductItems);
+  const [isDetailDrawerVisible, setIsDetailDrawerVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [editorContent, setEditorContent] = useState('');
+  const [activeTab, setActiveTab] = useState('basic');
+  const [fileList, setFileList] = useState([]);
+
+  console.log(Storage.Cookie.get('token'));
+
+  // API hooks
   const { data: productRes, isLoading } = useProducts();
   const { data: categoriesRes } = useCategories();
-  const [form] = Form.useForm();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const { getColumnSearchProps } = useColumnSearch();
-  const [selectedProduct, setSelectedProduct] = useState<DataType | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const { mutate: createProduct, isPending: isCreating } = useCreateProduct();
-  const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();
-  const { mutate: deleteProduct } = useDeleteProduct();
+  const { mutate: deleteProduct, isLoading: isDeleting } = useDeleteProduct();
+  const { mutate: createProduct, isLoading: isCreating } = useCreateProduct();
+  const { mutate: updateProduct, isLoading: isUpdating } = useUpdateProduct();
 
-  const isMutating = isCreating || isUpdating;
+  // Modal hooks
+  const {
+    isVisible: isModalVisible,
+    isEditing,
+    openModal,
+    closeModal,
+  } = useModal();
 
-  const [editorContent, setEditorContent] = useState('');
-  console.log(Storage.Cookie.get('token'));
-  const columns: ColumnsType<DataType> = [
+  const {
+    isVisible: isVariantModalVisible,
+    openModal: openVariantModal,
+    closeModal: closeVariantModal,
+  } = useModal();
+
+  const transformedProducts = useMemo(() => {
+    if (!productRes?.products || !Array.isArray(productRes.products)) {
+      return [];
+    }
+
+    return productRes.products.map((product) => ({
+      id: product._id || '',
+      productName: product.productName || 'Không có tên',
+      categoryName: product.categoryId?.categoryName || 'Chưa phân loại',
+      categoryId: product.categoryId?._id || product.categoryId || null,
+      thumbnails:
+        Array.isArray(product.thumbnails) && product.thumbnails.length > 0
+          ? product.thumbnails
+          : ['https://via.placeholder.com/150x150/87CEEB'],
+      content: product.content || '',
+      status: product.status || 'active',
+      createdAt: product.createdAt
+        ? new Date(product.createdAt).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
+      totalVariants: product.totalVariants || 0,
+      totalStock: product.totalStock || 0,
+      minPrice: product.minPrice || 0,
+      maxPrice: product.maxPrice || product.minPrice || 0,
+    }));
+  }, [productRes]);
+
+  // Statistics data based on API data
+  const statisticsData: StatisticItem[] = useMemo(
+    () => [
+      {
+        title: 'Tổng sản phẩm',
+        value: transformedProducts.length,
+        prefix: <ShoppingOutlined />,
+        valueStyle: { color: '#1890ff' },
+      },
+      {
+        title: 'Đang hoạt động',
+        value: transformedProducts.filter((p) => p.status === 'active').length,
+        prefix: <TagOutlined />,
+        valueStyle: { color: '#52c41a' },
+      },
+      {
+        title: 'Tổng biến thể',
+        value: productItems.length,
+        prefix: <BgColorsOutlined />,
+        valueStyle: { color: '#722ed1' },
+      },
+      {
+        title: 'Tổng tồn kho',
+        value: productItems.reduce((sum, item) => sum + item.qtyInStock, 0),
+        prefix: <BarChartOutlined />,
+        valueStyle: { color: '#fa8c16' },
+      },
+    ],
+    [transformedProducts, productItems],
+  );
+
+  // Table columns
+  const columns = [
     {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      width: '15%',
+      title: 'Hình ảnh',
+      dataIndex: 'thumbnails',
+      key: 'thumbnails',
+      width: 80,
+      render: (thumbnails: any) => (
+        <Image
+          width={60}
+          height={60}
+          src={thumbnails?.[0]}
+          className="rounded-lg object-cover"
+          alt="Product Thumbnail"
+        />
+      ),
     },
     {
       title: 'Tên sản phẩm',
       dataIndex: 'productName',
       key: 'productName',
-      width: '25%',
-      ...getColumnSearchProps('productName'),
+      width: 200,
+      render: (text, record) => (
+        <div>
+          <Text strong>{text}</Text>
+          <br />
+          <Text type="secondary" className="text-xs">
+            ID: {record.id}
+          </Text>
+        </div>
+      ),
     },
     {
       title: 'Danh mục',
       dataIndex: 'categoryName',
       key: 'categoryName',
-      width: '20%',
-      ...getColumnSearchProps('categoryName'),
+      width: 120,
+      render: (text) => <Tag color="blue">{text}</Tag>,
     },
     {
-      title: 'Ảnh mẫu',
-      dataIndex: 'thumbnail',
-      key: 'thumbnails',
-      width: '15%',
+      title: 'Biến thể',
+      key: 'variants',
+      width: 100,
       render: (_, record) => (
-        <img
-          src={record.thumbnails?.[0]}
-          alt="thumbnail"
-          className="w-20 h-20 object-cover rounded"
+        <div className="text-center">
+          <Badge count={record.totalVariants} showZero>
+            <AppstoreOutlined className="text-lg" />
+          </Badge>
+        </div>
+      ),
+    },
+    {
+      title: 'Tồn kho',
+      dataIndex: 'totalStock',
+      key: 'totalStock',
+      width: 80,
+      render: (stock) => (
+        <Badge
+          count={stock}
+          showZero
+          style={{
+            backgroundColor:
+              stock > 50 ? '#52c41a' : stock > 10 ? '#faad14' : '#ff4d4f',
+          }}
         />
       ),
     },
-
     {
-      title: 'Action',
-      key: 'action',
-      width: '10%',
-      render: (_, record) => (
-        <Space size="middle">
-          <a
-            onClick={() => {
-              setSelectedProduct(record);
-              form.setFieldsValue({ ...record, category: record.category });
-              if (record.thumbnails) {
-                setFileList(
-                  record.thumbnails.map((url, index) => ({
-                    uid: `${index}`,
-                    name: `thumbnail-${index}.png`,
-                    status: 'done',
-                    url,
-                  })),
-                );
-              }
-
-              if (record && record.content) {
-                setEditorContent(record.content);
-              }
-
-              setIsEditing(true);
-              setIsModalVisible(true);
-            }}
-          >
-            Edit
-          </a>
-          <a
-            onClick={() => {
-              setSelectedProduct(record);
-              setIsDeleteModalVisible(true);
-            }}
-          >
-            Delete
-          </a>
-        </Space>
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      key: 'status',
+      width: 100,
+      render: (status) => (
+        <Tag color={status === 'active' ? 'green' : 'red'}>
+          {status === 'active' ? 'Hoạt động' : 'Tạm dừng'}
+        </Tag>
       ),
+    },
+    {
+      title: 'Thao tác',
+      key: 'action',
+      width: 150,
+      render: (_, record) => {
+        const actions: ActionButton[] = [
+          {
+            type: 'view',
+            tooltip: 'Xem chi tiết',
+            onClick: () => handleViewDetail(record),
+          },
+          {
+            type: 'edit',
+            tooltip: 'Chỉnh sửa',
+            onClick: () => handleEdit(record),
+          },
+          {
+            type: 'delete',
+            tooltip: 'Xóa',
+            confirmTitle: 'Bạn có chắc chắn muốn xóa sản phẩm này?',
+            onClick: async () => {
+              await deleteProduct(record.id);
+            },
+          },
+        ];
+        return <ActionButtons actions={actions} />;
+      },
     },
   ];
 
-  const handleModalSubmit = async () => {
-    form.validateFields().then((values) => {
+  // Event handlers
+  const handleViewDetail = useCallback((product) => {
+    setSelectedProduct(product);
+    setIsDetailDrawerVisible(true);
+  }, []);
+
+  const handleEdit = useCallback(
+    (product) => {
+      setSelectedProduct(product);
+      openModal(product, true);
+      form.setFieldsValue(product);
+      setEditorContent(product.content || '');
+      setFileList(
+        product.thumbnails?.map((url, index) => ({
+          uid: `${index}`,
+          name: `image-${index}`,
+          status: 'done',
+          url,
+        })) || [],
+      );
+    },
+    [form, openModal],
+  );
+
+  const handleAddNew = useCallback(() => {
+    openModal();
+    form.resetFields();
+    setFileList([]);
+    setEditorContent('');
+  }, [form, openModal]);
+
+  // const handleSaveProduct = async () => {
+  //   try {
+  //     const values = await form.validateFields();
+
+  //     // Tạo FormData thay vì object thông thường
+  //     const formData = new FormData();
+  //     formData.append('productName', values.productName || '');
+  //     formData.append('categoryId', values.categoryId || '');
+  //     formData.append('content', editorContent || '');
+
+  //     // Append files từ fileList
+  //     fileList.forEach((file) => {
+  //       if (file?.originFileObj) {
+  //         // File mới được upload
+  //         formData.append('thumbnails', file.originFileObj);
+  //       } else if (file.url && !file.originFileObj) {
+  //         // File đã tồn tại (trường hợp edit)
+  //         formData.append('existingThumbnails', file.url);
+  //       }
+  //     });
+
+  //     // Debug log
+  //     for (const pair of formData.entries()) {
+  //       console.log(pair[0], pair[1]);
+  //     }
+
+  //     if (isEditing) {
+  //       console.log('Updating product:', selectedProduct?.id);
+  //       await updateProduct({ id: selectedProduct?.id ?? '', data: formData });
+  //     } else {
+  //       await createProduct(formData);
+  //     }
+  //   } catch (error) {
+  //     console.error('Form validation error:', error);
+  //   } finally {
+  //     closeModal();
+  //     form.resetFields();
+  //     setFileList([]);
+  //     setEditorContent('');
+  //   }
+  // };
+  const handleSaveProduct = async () => {
+    try {
+      const values = await form.validateFields();
+
       const formData = new FormData();
       formData.append('productName', values.productName || '');
-      formData.append('categoryId', values.category || '');
+      formData.append('categoryId', values.categoryId || '');
       formData.append('content', editorContent || '');
 
-      fileList.forEach((file: any) => {
-        formData.append('thumbnails', file.originFileObj);
+      // Phân loại files
+      const newFiles = [];
+      const existingUrls = [];
+
+      fileList.forEach((file) => {
+        if (file?.originFileObj) {
+          // File mới được upload
+          newFiles.push(file.originFileObj);
+        } else if (file.url && !file.originFileObj) {
+          // File đã tồn tại
+          existingUrls.push(file.url);
+        }
       });
 
-      console.log('FormData entries:');
+      // Append files mới
+      newFiles.forEach((file) => {
+        formData.append('thumbnails', file);
+      });
+
+      // QUAN TRỌNG: Gửi existingThumbnails dưới dạng JSON string
+      if (existingUrls.length > 0) {
+        formData.append('existingThumbnails', JSON.stringify(existingUrls));
+      }
+
       for (const pair of formData.entries()) {
         console.log(pair[0], pair[1]);
       }
 
-      const onSuccess = () => {
-        console.log(
-          isEditing ? 'Update product success' : 'Create product success',
-        );
-        setIsModalVisible(false);
-        form.resetFields();
-        setFileList([]);
-        setIsEditing(false);
+      if (isEditing) {
+        await updateProduct({
+          id: selectedProduct?.id ?? '',
+          data: formData,
+        });
+      } else {
+        await createProduct(formData);
+      }
+
+      closeModal();
+      form.resetFields();
+      setFileList([]);
+      setEditorContent('');
+    } catch (error) {
+      console.error('Error saving product:', error);
+    }
+  };
+
+  const handleAddVariant = useCallback(() => {
+    openVariantModal();
+    variantForm.resetFields();
+  }, [openVariantModal, variantForm]);
+
+  const handleEditVariant = useCallback(
+    (variant) => {
+      openVariantModal(variant, true);
+      variantForm.setFieldsValue(variant);
+    },
+    [openVariantModal, variantForm],
+  );
+
+  const handleDeleteVariant = useCallback(
+    (variantId) => {
+      setProductItems(productItems.filter((item) => item._id !== variantId));
+    },
+    [productItems],
+  );
+
+  const handleSaveVariant = useCallback(async () => {
+    try {
+      const values = await variantForm.validateFields();
+      const newVariant = {
+        _id: Date.now().toString(),
+        productId: selectedProduct.id,
+        SKU: values.SKU,
+        price: values.price,
+        qtyInStock: values.qtyInStock,
+        images:
+          values.images?.map((file) => file.url || file.response?.url) || [],
+        configurations: values.configurations || [],
       };
 
-      if (isEditing) {
-        updateProduct(
-          { id: selectedProduct?.id ?? '', data: formData },
-          { onSuccess },
-        );
-      } else {
-        createProduct(formData, { onSuccess });
-      }
-    });
-  };
-  const handleDelete = async () => {
-    console.log(selectedProduct?.id);
-    await deleteProduct(selectedProduct?.id ?? '');
-    setIsDeleteModalVisible(false);
-  };
+      setProductItems([...productItems, newVariant]);
+      closeVariantModal();
+      variantForm.resetFields();
+    } catch (error) {
+      console.error('Error saving variant:', error);
+    }
+  }, [variantForm, selectedProduct, productItems, closeVariantModal]);
 
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const currentProductItems = productItems.filter(
+    (item) => item.productId === selectedProduct?.id,
+  );
 
-  const formattedData = productRes?.products?.map((item: any) => ({
-    key: item._id,
-    id: item._id,
-    productName: item.productName,
-    categoryName: item.categoryId?.categoryName || 'Không có',
-    content: item.content,
-    thumbnails: item.thumbnails,
-    category: item.categoryId?._id,
-  }));
+  const statisticsForDetail: StatisticItem[] = [
+    {
+      title: 'Tổng biến thể',
+      value: currentProductItems.length,
+      prefix: <AppstoreOutlined />,
+    },
+    {
+      title: 'Tổng tồn kho',
+      value: currentProductItems.reduce(
+        (sum, item) => sum + item.qtyInStock,
+        0,
+      ),
+      prefix: <BarChartOutlined />,
+    },
+    {
+      title: 'Giá trung bình',
+      value: currentProductItems.length
+        ? Math.round(
+            currentProductItems.reduce((sum, item) => sum + item.price, 0) /
+              currentProductItems.length,
+          )
+        : 0,
+      suffix: 'đ',
+      prefix: <TagOutlined />,
+    },
+  ];
+
+  // Variant table columns
+  const variantColumns = [
+    {
+      title: 'Hình ảnh',
+      dataIndex: 'images',
+      key: 'images',
+      width: 80,
+      render: (images) => (
+        <Image
+          width={50}
+          height={50}
+          src={images?.[0] || 'https://via.placeholder.com/50x50'}
+          className="rounded object-cover"
+        />
+      ),
+    },
+    {
+      title: 'SKU',
+      dataIndex: 'SKU',
+      key: 'SKU',
+      width: 150,
+      render: (text) => <Text code>{text}</Text>,
+    },
+    {
+      title: 'Cấu hình',
+      dataIndex: 'configurations',
+      key: 'configurations',
+      width: 200,
+      render: (configs) => (
+        <Space wrap>
+          {configs?.map((config, index) => (
+            <Tag
+              key={index}
+              color={config.variationOption.color ? 'default' : 'blue'}
+              style={
+                config.variationOption.color
+                  ? {
+                      backgroundColor: config.variationOption.color,
+                      color:
+                        config.variationOption.color === '#ffffff'
+                          ? '#000'
+                          : '#fff',
+                    }
+                  : {}
+              }
+            >
+              {config.variationOption.value}
+            </Tag>
+          ))}
+        </Space>
+      ),
+    },
+    {
+      title: 'Giá',
+      dataIndex: 'price',
+      key: 'price',
+      width: 120,
+      render: (price) => <Text strong>{price?.toLocaleString('vi-VN')}đ</Text>,
+    },
+    {
+      title: 'Tồn kho',
+      dataIndex: 'qtyInStock',
+      key: 'qtyInStock',
+      width: 100,
+      render: (qty) => (
+        <Badge
+          count={qty}
+          showZero
+          style={{
+            backgroundColor:
+              qty > 20 ? '#52c41a' : qty > 5 ? '#faad14' : '#ff4d4f',
+          }}
+        />
+      ),
+    },
+    {
+      title: 'Thao tác',
+      key: 'action',
+      width: 100,
+      render: (_, record) => {
+        const actions: ActionButton[] = [
+          {
+            type: 'edit',
+            onClick: () => handleEditVariant(record),
+          },
+          {
+            type: 'delete',
+            confirmTitle: 'Xóa biến thể này?',
+            onClick: () => handleDeleteVariant(record._id),
+          },
+        ];
+        return <ActionButtons actions={actions} size="small" />;
+      },
+    },
+  ];
 
   return (
-    <div>
-      <div className="flex row gap-6 items-start">
-        <Card className="w-[15%] h-38">
-          <div className=" justify-center gap-4">
-            <CrownOutlined className="text-2xl flex items-center justify-center rounded-md h-12 w-12 bg-red-200" />
-            <div>
-              <Title level={4} className="!mb-0">
-                {productRes?.products?.length || 0}
-              </Title>
-              <Typography>Tổng Sản phẩm</Typography>
-            </div>
-          </div>
-        </Card>
-        <Card
-          className="w-[15%] h-38 flex flex-col justify-center gap-4 items-center cursor-pointer"
-          onClick={() => {
-            form.resetFields();
-            setFileList([]);
-            setIsEditing(false);
-            setIsModalVisible(true);
-          }}
-        >
-          <PlusCircleOutlined className="text-4xl !text-green-500 " />
-        </Card>
-      </div>
-      <Table
-        className="mt-4 w-full"
-        columns={columns}
-        dataSource={formattedData}
-        loading={isLoading}
-        pagination={{ pageSize: 10 }}
+    <div className="p-6">
+      <PageHeader
+        title="Quản lý sản phẩm"
+        actionButton={{
+          text: 'Thêm sản phẩm mới',
+          icon: <PlusOutlined />,
+          onClick: handleAddNew,
+        }}
       />
 
-      <Modal
-        confirmLoading={isMutating}
-        className="!w-[60%] !h-[60%]"
-        title={isEditing ? 'Chỉnh sửa sản phẩm' : 'Tạo sản phẩm mới'}
+      <StatisticsCards statistics={statisticsData} />
+
+      <CustomTable
+        columns={columns}
+        dataSource={transformedProducts}
+        loading={isLoading}
+        rowKey="id"
+        paginationConfig={{
+          pageSize: 10,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: true,
+        }}
+      />
+
+      <CustomModal
+        title={isEditing ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
         open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        onOk={handleModalSubmit}
-        okText={isEditing ? 'Cập nhật' : 'Tạo'}
+        onCancel={closeModal}
+        onSave={handleSaveProduct}
+        saveText={isEditing ? 'Cập nhật' : 'Tạo sản phẩm'}
+        loading={isCreating || isUpdating}
+        width={'60%'}
       >
         <Form form={form} layout="vertical">
-          <Form.Item
-            label="Tên sản phẩm"
-            name="productName"
-            rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm' }]}
-          >
-            <Input size="large" />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                label="Tên sản phẩm"
+                name="productName"
+                rules={[
+                  { required: true, message: 'Vui lòng nhập tên sản phẩm' },
+                ]}
+              >
+                <Input size="large" placeholder="Nhập tên sản phẩm" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="Danh mục"
+                name="categoryId"
+                rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}
+              >
+                <Select size="large" placeholder="Chọn danh mục">
+                  {categoriesRes?.categories?.map((cat) => (
+                    <Option key={cat._id} value={cat._id}>
+                      {cat.categoryName}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
 
-          <Form.Item
-            label="Danh mục"
-            name="category"
-            rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}
-          >
-            <Select size="large" allowClear placeholder="Chọn danh mục">
-              {categoriesRes?.categories?.map((cat: any) => (
-                <Option key={cat._id} value={cat._id}>
-                  {cat.categoryName}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item label="Nội dung chi tiết" name="content">
+          <Form.Item label="Mô tả sản phẩm" name="content">
             <RichTextEditor
               content={editorContent}
               onChange={setEditorContent}
-              uploadPreset="tiptap_image" // your upload preset name
+              uploadPreset="tiptap_image"
             />
           </Form.Item>
 
-          <Form.Item
-            label="Thumbnail"
+          <ImageUpload
+            value={fileList}
+            onChange={setFileList}
+            maxCount={5}
+            label="Hình ảnh sản phẩm"
             required
-            rules={[{ required: true, message: 'Vui lòng tải ảnh sản phẩm' }]}
-          >
-            <Upload
-              fileList={fileList}
-              onChange={({ fileList: newList }) => {
-                setFileList(newList);
-                console.log(newList);
-              }}
-              listType="picture"
-              beforeUpload={() => false}
-              maxCount={5}
-              multiple
-            >
-              <UploadOutlined /> Chọn ảnh
-            </Upload>
-          </Form.Item>
+          />
         </Form>
-      </Modal>
+      </CustomModal>
 
-      <Modal
-        title="Xác nhận xóa"
-        open={isDeleteModalVisible}
-        onCancel={() => setIsDeleteModalVisible(false)}
-        onOk={handleDelete}
-        okText="Xóa"
-        cancelText="Hủy"
+      {/* Product Detail Drawer */}
+      <Drawer
+        title={
+          <div className="flex items-center gap-3">
+            <img
+              src={selectedProduct?.thumbnails?.[0]}
+              alt="product"
+              className="w-10 h-10 rounded-lg object-cover"
+            />
+            <div>
+              <div className="font-semibold">
+                {selectedProduct?.productName}
+              </div>
+              <div className="text-sm text-gray-500">Chi tiết sản phẩm</div>
+            </div>
+          </div>
+        }
+        width={1000}
+        open={isDetailDrawerVisible}
+        onClose={() => setIsDetailDrawerVisible(false)}
+        extra={
+          <Button
+            type="primary"
+            icon={<PlusCircleOutlined />}
+            onClick={handleAddVariant}
+          >
+            Thêm biến thể
+          </Button>
+        }
       >
-        <p>
-          Bạn có chắc chắn muốn xóa sản phẩm{' '}
-          <strong>{selectedProduct?.productName}</strong> không?
-        </p>
-      </Modal>
+        <Tabs activeKey={activeTab} onChange={setActiveTab}>
+          <TabPane tab="Thông tin cơ bản" key="basic">
+            <div className="space-y-4">
+              <Row gutter={16}>
+                <Col span={12}>
+                  <div className="border rounded-lg p-4">
+                    <Text strong>Tên sản phẩm:</Text>
+                    <div className="mt-1">{selectedProduct?.productName}</div>
+                  </div>
+                </Col>
+                <Col span={12}>
+                  <div className="border rounded-lg p-4">
+                    <Text strong>Danh mục:</Text>
+                    <div className="mt-1">
+                      <Tag color="blue">{selectedProduct?.categoryName}</Tag>
+                    </div>
+                  </div>
+                </Col>
+              </Row>
+
+              <div className="border rounded-lg p-4">
+                <Text strong>Mô tả:</Text>
+                <div
+                  className="mt-2"
+                  dangerouslySetInnerHTML={{
+                    __html: selectedProduct?.content || 'Chưa có mô tả',
+                  }}
+                />
+              </div>
+
+              <div className="border rounded-lg p-4">
+                <Text strong>Hình ảnh:</Text>
+                <div className="mt-2 flex gap-2">
+                  {selectedProduct?.thumbnails?.map((img, index) => (
+                    <Image
+                      key={index}
+                      width={100}
+                      height={100}
+                      src={img}
+                      className="rounded-lg object-cover"
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </TabPane>
+
+          <TabPane
+            tab={`Biến thể (${currentProductItems.length})`}
+            key="variants"
+          >
+            <CustomTable
+              columns={variantColumns}
+              dataSource={currentProductItems}
+              rowKey="_id"
+              showCard={false}
+              paginationConfig={{ pageSize: 5 }}
+              size="small"
+            />
+          </TabPane>
+
+          <TabPane tab="Thống kê" key="statistics">
+            <StatisticsCards statistics={statisticsForDetail} span={8} />
+          </TabPane>
+        </Tabs>
+      </Drawer>
+
+      {/* Variant Form Modal */}
+      <CustomModal
+        title="Thêm biến thể mới"
+        open={isVariantModalVisible}
+        onCancel={closeVariantModal}
+        onSave={handleSaveVariant}
+        width={600}
+      >
+        <Form form={variantForm} layout="vertical">
+          <Form.Item
+            label="SKU"
+            name="SKU"
+            rules={[{ required: true, message: 'Vui lòng nhập SKU' }]}
+          >
+            <Input placeholder="VD: TSN-001-S-RED" />
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                label="Giá"
+                name="price"
+                rules={[{ required: true, message: 'Vui lòng nhập giá' }]}
+              >
+                <InputNumber
+                  style={{ width: '100%' }}
+                  placeholder="299000"
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                  }
+                  parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="Số lượng"
+                name="qtyInStock"
+                rules={[{ required: true, message: 'Vui lòng nhập số lượng' }]}
+              >
+                <InputNumber
+                  style={{ width: '100%' }}
+                  min={0}
+                  placeholder="100"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item label="Cấu hình biến thể">
+            <div className="space-y-3">
+              <div>
+                <Text strong>Size:</Text>
+                <Select
+                  style={{ width: '100%', marginTop: 4 }}
+                  placeholder="Chọn size"
+                >
+                  {mockVariationOptions.var1.map((opt) => (
+                    <Option key={opt._id} value={opt._id}>
+                      {opt.value}
+                    </Option>
+                  ))}
+                </Select>
+              </div>
+
+              <div>
+                <Text strong>Màu sắc:</Text>
+                <Select
+                  style={{ width: '100%', marginTop: 4 }}
+                  placeholder="Chọn màu sắc"
+                >
+                  {mockVariationOptions.var2.map((opt) => (
+                    <Option key={opt._id} value={opt._id}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-4 h-4 rounded border"
+                          style={{ backgroundColor: opt.color }}
+                        />
+                        {opt.value}
+                      </div>
+                    </Option>
+                  ))}
+                </Select>
+              </div>
+            </div>
+          </Form.Item>
+
+          <ImageUpload
+            maxCount={3}
+            label="Hình ảnh biến thể"
+            uploadText="Tải ảnh"
+            listType="picture-card"
+          />
+        </Form>
+      </CustomModal>
     </div>
   );
-}
+};
+
+export default ProductManagement;

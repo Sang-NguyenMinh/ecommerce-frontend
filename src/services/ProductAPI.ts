@@ -1,8 +1,6 @@
-import { API_URL } from "libs/env";
-import { axios } from "../libs/custom-axios";
-import {
-  IBaseQuery,
-} from "@/configs/types";
+import { API_URL } from 'libs/env';
+import { axios } from '../libs/custom-axios';
+import { IBaseQuery } from '@/configs/types';
 
 const PRODUCT_URL = `${API_URL}/product`;
 
@@ -14,15 +12,16 @@ export const ProductAPI = {
   },
 
   createOne: (formData: FormData) => {
-    console.log("FormData entriesapi:");
+    console.log('FormData entriesapi:');
     for (const pair of formData.entries()) {
       console.log(pair[0], pair[1]);
     }
     return axios.post(`${PRODUCT_URL}`, formData);
   },
-  //   updateOne: (id: string, data: IUpdateProduct) => {
-  //     return axios.patch(`${PRODUCT_URL}/${id}`, data);
-  //   },
+
+  updateOne: (id: string, data: FormData) => {
+    return axios.patch(`${PRODUCT_URL}/${id}`, data);
+  },
 
   deleteOne: (id: string) => {
     return axios.delete(`${PRODUCT_URL}/${id}`);

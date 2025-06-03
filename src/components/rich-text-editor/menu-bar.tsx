@@ -13,8 +13,6 @@ import {
   ListOrdered,
   Strikethrough,
   Loader2,
-  Maximize2,
-  Minimize2,
   RotateCcw,
 } from 'lucide-react';
 import { Toggle } from '../ui/toggle';
@@ -58,7 +56,7 @@ export default function MenuBar({
       if (node.type.name === 'image' || node.type.name === 'resizableImage') {
         imageNode = node;
         imagePos = pos;
-        return false; // Stop searching
+        return false;
       }
     });
 
@@ -214,7 +212,6 @@ export default function MenuBar({
           )}
         </Button>
 
-        {/* Toggle Image Controls */}
         {isImageSelected && (
           <Button
             variant="ghost"
@@ -229,7 +226,6 @@ export default function MenuBar({
         )}
       </div>
 
-      {/* Image Controls Panel */}
       {isImageSelected && showImageControls && (
         <div className="flex items-center gap-1 p-2 bg-blue-50 rounded border-t">
           <span className="text-xs text-gray-600 mr-2">Resize:</span>
