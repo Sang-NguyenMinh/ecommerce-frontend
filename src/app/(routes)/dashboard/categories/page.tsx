@@ -1,7 +1,16 @@
 'use client';
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { Form, Input, Select, Typography, Tag, Switch } from 'antd';
+import {
+  Form,
+  Input,
+  Select,
+  Typography,
+  Tag,
+  Switch,
+  Image,
+  Spin,
+} from 'antd';
 import {
   PlusOutlined,
   AppstoreOutlined,
@@ -21,11 +30,13 @@ import {
   ActionButtons,
   CustomModal,
   CustomTable,
+  ImageUpload,
   PageHeader,
   StatisticItem,
   StatisticsCards,
   useModal,
 } from '../products/component/custom';
+import { SP } from 'next/dist/shared/lib/utils';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -38,10 +49,8 @@ interface CategoryData {
     categoryName: string;
   } | null;
   status: boolean;
-  level: number;
-  hasChildren: boolean;
-  childrenCount: number;
   createdAt?: string;
+  thumbnail?: string;
 }
 
 const CategoryManagement = () => {
@@ -50,10 +59,14 @@ const CategoryManagement = () => {
     null,
   );
 
+  const [fileList, setFileList] = useState([]);
+
   const { data: categoriesRes, isLoading } = useCategories();
-  const { mutate: deleteCategory, isLoading: isDeleting } = useDeleteCategory();
-  const { mutate: createCategory, isLoading: isCreating } = useCreateCategory();
-  const { mutate: updateCategory, isLoading: isUpdating } = useUpdateCategory();
+  const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
+  const { mutate: createCategory, isPending: isCreating } = useCreateCategory();
+  const { mutate: updateCategory, isPending: isUpdating } = useUpdateCategory();
+
+  console.log('categoriesRes', categoriesRes);
 
   const {
     isVisible: isModalVisible,
@@ -62,93 +75,29 @@ const CategoryManagement = () => {
     closeModal,
   } = useModal();
 
-  // Hàm sắp xếp danh mục theo cấu trúc cây
-  const buildCategoryTree = useCallback((categories: any[]) => {
-    if (!categories || !Array.isArray(categories)) return [];
-
-    // Tạo map để dễ tìm kiếm
-    const categoryMap = new Map();
-    const rootCategories: any[] = [];
-
-    // Đầu tiên, tạo tất cả các node
-    categories.forEach((category) => {
-      const transformedCategory = {
-        id: category._id || '',
-        categoryName: category.categoryName || 'Không có tên',
-        parentCategory: category.parentCategory,
-        parentName: category.parentCategory?.categoryName || 'Danh mục gốc',
-        parentId: category.parentCategory?._id || null,
-        status: category.status === true,
-        level: 0, // Sẽ được tính lại
-        hasChildren: false, // Sẽ được tính lại
-        childrenCount: 0, // Sẽ được tính lại
-        createdAt: category.createdAt || new Date().toISOString(),
-        children: [],
-        originalData: category,
-      };
-      categoryMap.set(transformedCategory.id, transformedCategory);
-    });
-
-    // Xây dựng cấu trúc cây và tính level
-    categoryMap.forEach((category) => {
-      if (category.parentId) {
-        const parent = categoryMap.get(category.parentId);
-        if (parent) {
-          parent.children.push(category);
-          category.level = parent.level + 1;
-        } else {
-          // Nếu không tìm thấy parent, coi như root
-          rootCategories.push(category);
-        }
-      } else {
-        rootCategories.push(category);
-      }
-    });
-
-    // Tính toán hasChildren và childrenCount
-    const calculateChildrenInfo = (category: any) => {
-      category.childrenCount = category.children.length;
-      category.hasChildren = category.childrenCount > 0;
-
-      // Đệ quy tính cho các con
-      category.children.forEach(calculateChildrenInfo);
-    };
-
-    rootCategories.forEach(calculateChildrenInfo);
-
-    // Flatten lại thành mảng phẳng theo thứ tự cây
-    const flattenCategories = (categories: any[], result: any[] = []) => {
-      categories.forEach((category) => {
-        result.push(category);
-        if (category.children.length > 0) {
-          flattenCategories(category.children, result);
-        }
-      });
-      return result;
-    };
-
-    return flattenCategories(rootCategories);
-  }, []);
-
   const transformedCategories = useMemo(() => {
-    if (
-      !categoriesRes?.categories ||
-      !Array.isArray(categoriesRes.categories)
-    ) {
+    if (!categoriesRes?.data || !Array.isArray(categoriesRes.data)) {
       return [];
     }
 
-    return buildCategoryTree(categoriesRes.categories);
-  }, [categoriesRes, buildCategoryTree]);
+    return categoriesRes.data.map((category: any) => ({
+      id: category._id || '',
+      thumbnail: category.thumbnail || '',
+      categoryName: category.categoryName || 'Không có tên',
+      parentCategory: category.parentCategory,
+      parentName: category.parentCategory?.categoryName || 'Danh mục gốc',
+      parentId: category.parentCategory?._id || null,
+      status: category.status === true,
+      createdAt: category.createdAt || new Date().toISOString(),
+      originalData: category,
+    }));
+  }, [categoriesRes]);
 
   // Statistics data
   const statisticsData: StatisticItem[] = useMemo(() => {
     const activeCategories = transformedCategories.filter((cat) => cat.status);
     const rootCategories = transformedCategories.filter((cat) => !cat.parentId);
-    const maxLevel = Math.max(
-      ...transformedCategories.map((cat) => cat.level),
-      0,
-    );
+    const childCategories = transformedCategories.filter((cat) => cat.parentId);
 
     return [
       {
@@ -170,8 +119,8 @@ const CategoryManagement = () => {
         valueStyle: { color: '#722ed1' },
       },
       {
-        title: 'Cấp độ tối đa',
-        value: maxLevel + 1,
+        title: 'Danh mục con',
+        value: childCategories.length,
         prefix: <ClockCircleOutlined />,
         valueStyle: { color: '#fa8c16' },
       },
@@ -181,39 +130,35 @@ const CategoryManagement = () => {
   // Table columns
   const columns = [
     {
+      title: 'Hình ảnh',
+      dataIndex: 'thumbnail',
+      key: 'thumbnail',
+      width: 80,
+      render: (thumbnail: any) => (
+        <Image
+          width={60}
+          height={60}
+          src={thumbnail}
+          className="rounded-lg object-cover"
+          alt="Product Thumbnail"
+        />
+      ),
+    },
+    {
       title: 'Tên danh mục',
       dataIndex: 'categoryName',
       key: 'categoryName',
       width: 250,
-      render: (text: string, record: CategoryData) => {
-        // Tạo indentation dựa trên level
-        const indent = '    '.repeat(record.level); // 4 spaces per level
-        const treeSymbol = record.level > 0 ? '└─ ' : '';
-
-        return (
+      render: (text: string, record: CategoryData) => (
+        <div>
+          <Text strong>{text}</Text>
           <div>
-            <div className="flex items-center gap-2">
-              <span style={{ fontFamily: 'monospace', color: '#999' }}>
-                {indent}
-                {treeSymbol}
-              </span>
-              <Text strong={record.level === 0}>{text}</Text>
-              {record.hasChildren && (
-                <Tag color="blue" size="small">
-                  {record.childrenCount}
-                </Tag>
-              )}
-            </div>
-            <div
-              style={{ paddingLeft: indent.length * 8 + treeSymbol.length * 8 }}
-            >
-              <Text type="secondary" className="text-xs">
-                ID: {record.id}
-              </Text>
-            </div>
+            <Text type="secondary" className="text-xs">
+              ID: {record.id}
+            </Text>
           </div>
-        );
-      },
+        </div>
+      ),
     },
     {
       title: 'Danh mục cha',
@@ -225,11 +170,14 @@ const CategoryManagement = () => {
       ),
     },
     {
-      title: 'Cấp độ',
-      dataIndex: 'level',
-      key: 'level',
-      width: 100,
-      render: (level: number) => <Tag color="purple">Cấp {level + 1}</Tag>,
+      title: 'Loại danh mục',
+      key: 'categoryType',
+      width: 120,
+      render: (_, record: CategoryData) => (
+        <Tag color={record.parentId ? 'orange' : 'purple'}>
+          {record.parentId ? 'Danh mục con' : 'Danh mục gốc'}
+        </Tag>
+      ),
     },
     {
       title: 'Trạng thái',
@@ -246,7 +194,7 @@ const CategoryManagement = () => {
       title: 'Ngày tạo',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 120,
+      width: 150,
       render: (date: string) => (
         <Text type="secondary">
           {new Date(date).toLocaleDateString('vi-VN')}
@@ -258,6 +206,11 @@ const CategoryManagement = () => {
       key: 'action',
       width: 150,
       render: (_: any, record: CategoryData) => {
+        // Check if this category has children
+        const hasChildren = transformedCategories.some(
+          (cat) => cat.parentId === record.id,
+        );
+
         const actions: ActionButton[] = [
           {
             type: 'edit',
@@ -268,8 +221,8 @@ const CategoryManagement = () => {
             type: 'delete',
             tooltip: 'Xóa',
             confirmTitle: 'Bạn có chắc chắn muốn xóa danh mục này?',
-            confirmDescription: record.hasChildren
-              ? `Danh mục này có ${record.childrenCount} danh mục con. Xóa sẽ ảnh hưởng đến các danh mục con.`
+            confirmDescription: hasChildren
+              ? 'Danh mục này có danh mục con. Xóa sẽ ảnh hưởng đến các danh mục con.'
               : undefined,
             onClick: () => deleteCategory(record.id),
           },
@@ -289,6 +242,15 @@ const CategoryManagement = () => {
         parentCategory: category.parentId,
         status: category.status,
       });
+
+      setFileList([
+        {
+          uid: `${category.id}-thumbnail`,
+          name: `image-${category.id}.jpg`,
+          status: 'done',
+          url: category.thumbnail,
+        },
+      ]);
     },
     [form, openModal],
   );
@@ -303,54 +265,65 @@ const CategoryManagement = () => {
     try {
       const values = await form.validateFields();
 
-      const payload = {
-        categoryName: values.categoryName,
-        status: values.status,
-        parentCategory: values.parentCategory || null,
-      };
+      const formData = new FormData();
+      formData.append('categoryName', values.categoryName || '');
+      formData.append('status', values.status || true);
+      if (values.parentCategory)
+        formData.append('parentCategory', values.parentCategory);
 
-      if (isEditing && selectedCategory) {
+      // Phân loại files
+      const newFiles = [];
+      const existingUrls = [];
+
+      fileList.forEach((file) => {
+        if (file?.originFileObj) {
+          newFiles.push(file.originFileObj);
+        } else if (file.url && !file.originFileObj) {
+          existingUrls.push(file.url);
+        }
+      });
+
+      newFiles.forEach((file) => {
+        formData.append('thumbnail', file);
+      });
+
+      // QUAN TRỌNG: Gửi existingThumbnails dưới dạng JSON string
+      if (existingUrls.length > 0) {
+        formData.append('existingThumbnail', JSON.stringify(existingUrls));
+      }
+
+      for (const pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
+      if (isEditing) {
         await updateCategory({
           id: selectedCategory.id,
-          data: payload,
+          data: formData,
         });
       } else {
-        await createCategory(payload);
+        await createCategory(formData);
       }
 
       closeModal();
       form.resetFields();
       setSelectedCategory(null);
+      setFileList([]);
     } catch (error) {
       console.error('Error saving category:', error);
     }
   };
 
-  // Available parent categories (exclude self and children when editing)
+  // Available parent categories (exclude self when editing)
   const availableParentCategories = useMemo(() => {
     if (!isEditing || !selectedCategory) {
       return transformedCategories;
     }
 
-    // Exclude the current category and all its children
-    const getChildrenIds = (parentId: string): string[] => {
-      const children = transformedCategories
-        .filter((cat) => cat.parentId === parentId)
-        .map((cat) => cat.id);
-
-      const allChildren = [...children];
-      children.forEach((childId) => {
-        allChildren.push(...getChildrenIds(childId));
-      });
-
-      return allChildren;
-    };
-
-    const excludeIds = [
-      selectedCategory.id,
-      ...getChildrenIds(selectedCategory.id),
-    ];
-    return transformedCategories.filter((cat) => !excludeIds.includes(cat.id));
+    // Exclude the current category to prevent circular reference
+    return transformedCategories.filter(
+      (cat) => cat.id !== selectedCategory.id,
+    );
   }, [transformedCategories, isEditing, selectedCategory]);
 
   return (
@@ -411,21 +384,11 @@ const CategoryManagement = () => {
               placeholder="Chọn danh mục cha (tùy chọn)"
               allowClear
             >
-              {availableParentCategories
-                .filter((cat) => cat.id !== selectedCategory?.id)
-                .map((cat) => {
-                  const indent = '    '.repeat(cat.level);
-                  const treeSymbol = cat.level > 0 ? '└─ ' : '';
-                  return (
-                    <Option key={cat.id} value={cat.id}>
-                      <span style={{ fontFamily: 'monospace' }}>
-                        {indent}
-                        {treeSymbol}
-                      </span>
-                      {cat.categoryName}
-                    </Option>
-                  );
-                })}
+              {availableParentCategories.map((cat) => (
+                <Option key={cat.id} value={cat.id}>
+                  {cat.categoryName}
+                </Option>
+              ))}
             </Select>
           </Form.Item>
 
@@ -442,21 +405,23 @@ const CategoryManagement = () => {
             />
           </Form.Item>
 
+          <ImageUpload
+            value={fileList}
+            onChange={setFileList}
+            maxCount={1}
+            label="Hình ảnh danh mục"
+            required
+          />
+
           {isEditing && selectedCategory && (
             <div className="bg-gray-50 p-4 rounded-lg">
               <Text type="secondary" className="text-sm">
                 <strong>Thông tin hiện tại:</strong>
                 <br />
-                Cấp độ: {selectedCategory.level + 1}
+                Loại:{' '}
+                {selectedCategory.parentId ? 'Danh mục con' : 'Danh mục gốc'}
                 <br />
-                Danh mục con: {selectedCategory.childrenCount}
-                <br />
-                {selectedCategory.hasChildren && (
-                  <span className="text-orange-600">
-                    ⚠️ Danh mục này có danh mục con. Thay đổi có thể ảnh hưởng
-                    đến cấu trúc cây.
-                  </span>
-                )}
+                Danh mục cha: {selectedCategory.parentName}
               </Text>
             </div>
           )}

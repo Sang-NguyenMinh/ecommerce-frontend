@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, use, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   Form,
   Input,
@@ -16,7 +16,6 @@ import {
   Col,
   Badge,
   Button,
-  message,
 } from 'antd';
 import {
   PlusOutlined,
@@ -313,47 +312,6 @@ const ProductManagement = () => {
     setEditorContent('');
   }, [form, openModal]);
 
-  // const handleSaveProduct = async () => {
-  //   try {
-  //     const values = await form.validateFields();
-
-  //     // Tạo FormData thay vì object thông thường
-  //     const formData = new FormData();
-  //     formData.append('productName', values.productName || '');
-  //     formData.append('categoryId', values.categoryId || '');
-  //     formData.append('content', editorContent || '');
-
-  //     // Append files từ fileList
-  //     fileList.forEach((file) => {
-  //       if (file?.originFileObj) {
-  //         // File mới được upload
-  //         formData.append('thumbnails', file.originFileObj);
-  //       } else if (file.url && !file.originFileObj) {
-  //         // File đã tồn tại (trường hợp edit)
-  //         formData.append('existingThumbnails', file.url);
-  //       }
-  //     });
-
-  //     // Debug log
-  //     for (const pair of formData.entries()) {
-  //       console.log(pair[0], pair[1]);
-  //     }
-
-  //     if (isEditing) {
-  //       console.log('Updating product:', selectedProduct?.id);
-  //       await updateProduct({ id: selectedProduct?.id ?? '', data: formData });
-  //     } else {
-  //       await createProduct(formData);
-  //     }
-  //   } catch (error) {
-  //     console.error('Form validation error:', error);
-  //   } finally {
-  //     closeModal();
-  //     form.resetFields();
-  //     setFileList([]);
-  //     setEditorContent('');
-  //   }
-  // };
   const handleSaveProduct = async () => {
     try {
       const values = await form.validateFields();
@@ -633,7 +591,7 @@ const ProductManagement = () => {
                 rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}
               >
                 <Select size="large" placeholder="Chọn danh mục">
-                  {categoriesRes?.categories?.map((cat) => (
+                  {categoriesRes?.data?.map((cat) => (
                     <Option key={cat._id} value={cat._id}>
                       {cat.categoryName}
                     </Option>

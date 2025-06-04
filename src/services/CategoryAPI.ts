@@ -1,6 +1,6 @@
 import { API_URL } from 'libs/env';
 import { axios } from '../libs/custom-axios';
-import { IBaseQuery, ICreateCategory, IUpdateCategory } from '@/configs/types';
+import { IBaseQuery } from '@/configs/types';
 
 const CATEGORY_URL = `${API_URL}/product-category`;
 
@@ -11,11 +11,11 @@ export const CategoryAPI = {
     return axios.get(`${CATEGORY_URL}`, { params });
   },
 
-  createOne: (data: ICreateCategory) => {
+  createOne: (data: FormData) => {
     return axios.post(`${CATEGORY_URL}`, data);
   },
 
-  updateOne: (id: string, data: IUpdateCategory) => {
+  updateOne: (id: string, data: FormData) => {
     return axios.patch(`${CATEGORY_URL}/${id}`, data);
   },
 
