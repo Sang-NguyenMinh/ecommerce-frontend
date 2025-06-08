@@ -12,10 +12,6 @@ export const ProductAPI = {
   },
 
   createOne: (formData: FormData) => {
-    console.log('FormData entriesapi:');
-    for (const pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
     return axios.post(`${PRODUCT_URL}`, formData);
   },
 

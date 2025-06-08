@@ -9,7 +9,8 @@ import {
   Tag,
   Switch,
   Image,
-  Spin,
+  Divider,
+  Checkbox,
 } from 'antd';
 import {
   PlusOutlined,
@@ -17,6 +18,7 @@ import {
   NodeIndexOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 
 import {
@@ -36,10 +38,16 @@ import {
   StatisticsCards,
   useModal,
 } from '../products/component/custom';
-import { SP } from 'next/dist/shared/lib/utils';
 
 const { Text } = Typography;
 const { Option } = Select;
+
+// 2. Thêm interface
+interface VariationConfigData {
+  variationId: string;
+  variationName: string;
+  isRequired: boolean;
+}
 
 interface CategoryData {
   id: string;
@@ -67,6 +75,15 @@ const CategoryManagement = () => {
   const { mutate: updateCategory, isPending: isUpdating } = useUpdateCategory();
 
   console.log('categoriesRes', categoriesRes);
+
+  const [selectedVariations, setSelectedVariations] = useState<
+    VariationConfigData[]
+  >([]);
+  const [availableVariations, setAvailableVariations] = useState([
+    { id: '1', name: 'Màu sắc', description: 'Các tùy chọn màu sắc' },
+    { id: '2', name: 'Kích thước', description: 'Các tùy chọn kích thước' },
+    { id: '3', name: 'Chất liệu', description: 'Loại chất liệu sản phẩm' },
+  ]);
 
   const {
     isVisible: isModalVisible,
@@ -233,6 +250,28 @@ const CategoryManagement = () => {
   ];
 
   // Event handlers
+  // const handleEdit = useCallback(
+  //   (category: CategoryData) => {
+  //     setSelectedCategory(category);
+  //     openModal(category, true);
+  //     form.setFieldsValue({
+  //       categoryName: category.categoryName,
+  //       parentCategory: category.parentId,
+  //       status: category.status,
+  //     });
+
+  //     setFileList([
+  //       {
+  //         uid: `${category.id}-thumbnail`,
+  //         name: `image-${category.id}.jpg`,
+  //         status: 'done',
+  //         url: category.thumbnail,
+  //       },
+  //     ]);
+  //   },
+  //   [form, openModal],
+  // );
+
   const handleEdit = useCallback(
     (category: CategoryData) => {
       setSelectedCategory(category);
@@ -242,6 +281,14 @@ const CategoryManagement = () => {
         parentCategory: category.parentId,
         status: category.status,
       });
+
+      // Load existing variations for this category
+      // Replace with actual API call
+      const existingVariations = [
+        { variationId: '1', variationName: 'Màu sắc', isRequired: true },
+        { variationId: '2', variationName: 'Kích thước', isRequired: false },
+      ];
+      setSelectedVariations(existingVariations);
 
       setFileList([
         {
@@ -255,10 +302,17 @@ const CategoryManagement = () => {
     [form, openModal],
   );
 
+  // const handleAddNew = useCallback(() => {
+  //   openModal();
+  //   form.resetFields();
+  //   setSelectedCategory(null);
+  // }, [form, openModal]);
+
   const handleAddNew = useCallback(() => {
     openModal();
     form.resetFields();
     setSelectedCategory(null);
+    setSelectedVariations([]); // Reset variations
   }, [form, openModal]);
 
   const handleSaveCategory = async () => {
@@ -270,6 +324,9 @@ const CategoryManagement = () => {
       formData.append('status', values.status || true);
       if (values.parentCategory)
         formData.append('parentCategory', values.parentCategory);
+
+      // Thêm variations vào formData
+      formData.append('variations', JSON.stringify(selectedVariations));
 
       // Phân loại files
       const newFiles = [];
@@ -287,13 +344,8 @@ const CategoryManagement = () => {
         formData.append('thumbnail', file);
       });
 
-      // QUAN TRỌNG: Gửi existingThumbnails dưới dạng JSON string
       if (existingUrls.length > 0) {
         formData.append('existingThumbnail', JSON.stringify(existingUrls));
-      }
-
-      for (const pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
       }
 
       if (isEditing) {
@@ -308,11 +360,93 @@ const CategoryManagement = () => {
       closeModal();
       form.resetFields();
       setSelectedCategory(null);
+      setSelectedVariations([]);
       setFileList([]);
     } catch (error) {
       console.error('Error saving category:', error);
     }
   };
+
+  const handleVariationChange = (variationId: string, checked: boolean) => {
+    if (checked) {
+      const variation = availableVariations.find((v) => v.id === variationId);
+      if (variation) {
+        setSelectedVariations((prev) => [
+          ...prev,
+          {
+            variationId: variation.id,
+            variationName: variation.name,
+            isRequired: false,
+          },
+        ]);
+      }
+    } else {
+      setSelectedVariations((prev) =>
+        prev.filter((v) => v.variationId !== variationId),
+      );
+    }
+  };
+
+  const handleRequiredChange = (variationId: string, isRequired: boolean) => {
+    setSelectedVariations((prev) =>
+      prev.map((v) =>
+        v.variationId === variationId ? { ...v, isRequired } : v,
+      ),
+    );
+  };
+
+  // const handleSaveCategory = async () => {
+  //   try {
+  //     const values = await form.validateFields();
+
+  //     const formData = new FormData();
+  //     formData.append('categoryName', values.categoryName || '');
+  //     formData.append('status', values.status || true);
+  //     if (values.parentCategory)
+  //       formData.append('parentCategory', values.parentCategory);
+
+  //     // Phân loại files
+  //     const newFiles = [];
+  //     const existingUrls = [];
+
+  //     fileList.forEach((file) => {
+  //       if (file?.originFileObj) {
+  //         newFiles.push(file.originFileObj);
+  //       } else if (file.url && !file.originFileObj) {
+  //         existingUrls.push(file.url);
+  //       }
+  //     });
+
+  //     newFiles.forEach((file) => {
+  //       formData.append('thumbnail', file);
+  //     });
+
+  //     // QUAN TRỌNG: Gửi existingThumbnails dưới dạng JSON string
+  //     if (existingUrls.length > 0) {
+  //       formData.append('existingThumbnail', JSON.stringify(existingUrls));
+  //     }
+
+  //     for (const pair of formData.entries()) {
+  //       console.log(pair[0], pair[1]);
+  //     }
+
+  //     if (isEditing) {
+  //       await updateCategory({
+  //         id: selectedCategory.id,
+  //         data: formData,
+  //       });
+  //     } else {
+  //       await createCategory(formData);
+  //     }
+
+  //     closeModal();
+  //     form.resetFields();
+  //     setSelectedCategory(null);
+  //     setFileList([]);
+  //   } catch (error) {
+  //     console.error('Error saving category:', error);
+  //   }
+  // };
 
   // Available parent categories (exclude self when editing)
   const availableParentCategories = useMemo(() => {
@@ -412,6 +546,76 @@ const CategoryManagement = () => {
             label="Hình ảnh danh mục"
             required
           />
+
+          <div className="space-y-4">
+            <Divider>Cấu hình biến thể sản phẩm</Divider>
+
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <Text className="text-sm text-blue-700">
+                <InfoCircleOutlined className="mr-2" />
+                Chọn các biến thể sẽ áp dụng cho sản phẩm thuộc danh mục này.
+                Biến thể "Bắt buộc" sẽ yêu cầu nhập khi tạo sản phẩm.
+              </Text>
+            </div>
+
+            <div className="space-y-3">
+              <Text strong>Chọn biến thể:</Text>
+              {availableVariations.map((variation) => {
+                const isSelected = selectedVariations.some(
+                  (sv) => sv.variationId === variation.id,
+                );
+                const selectedVar = selectedVariations.find(
+                  (sv) => sv.variationId === variation.id,
+                );
+
+                return (
+                  <div key={variation.id} className="border p-3 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Checkbox
+                          checked={isSelected}
+                          onChange={(e) =>
+                            handleVariationChange(
+                              variation.id,
+                              e.target.checked,
+                            )
+                          }
+                        >
+                          <Text strong>{variation.name}</Text>
+                        </Checkbox>
+                        <Text type="secondary" className="text-sm">
+                          {variation.description}
+                        </Text>
+                      </div>
+
+                      {isSelected && (
+                        <div className="flex items-center space-x-2">
+                          <Text className="text-sm">Bắt buộc:</Text>
+                          <Switch
+                            size="small"
+                            checked={selectedVar?.isRequired || false}
+                            onChange={(checked) =>
+                              handleRequiredChange(variation.id, checked)
+                            }
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {selectedVariations.length > 0 && (
+              <div className="bg-green-50 p-3 rounded-lg">
+                <Text className="text-sm text-green-700">
+                  <CheckCircleOutlined className="mr-2" />
+                  Đã chọn {selectedVariations.length} biến thể:{' '}
+                  {selectedVariations.map((v) => v.variationName).join(', ')}
+                </Text>
+              </div>
+            )}
+          </div>
 
           {isEditing && selectedCategory && (
             <div className="bg-gray-50 p-4 rounded-lg">

@@ -1,46 +1,38 @@
 'use client';
+import React from 'react';
+import { ConfigProvider } from 'antd';
+import Header from '@/components/Header';
+import HeroSection from '@/components/HeroSection';
+import CategorySection from '@/components/CategorySection';
+import FeaturedProducts from '@/components/FeaturedProducts';
+import BrandSection from '@/components/BrandSection';
+import NewsletterSection from '@/components/NewsletterSection';
+import Footer from '@/components/Footer';
 
-import { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../redux/store';
-import { authBegin, authFailure, authSuccess } from '../redux/authSlice';
-import { AuthAPI } from 'services/AuthAPI';
-import { IToken } from 'configs/custom-types';
-import {
-  getUserBegin,
-  getUserFailure,
-  getUserSuccess,
-} from '../redux/userSlice';
-import UserAPI from 'services/UserAPI';
-
-export default function Home() {
-  const { phone } = useAppSelector((state) => state.user);
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    const login = async () => {
-      await AuthAPI.logIn('Admin@gmail.com', 'Admin@gmail.com')
-        .then(async (resp) => {
-          dispatch(authBegin());
-          const token: IToken = resp.data;
-          console.log('tokennnnnn', resp);
-          dispatch(authSuccess({ token }));
-          dispatch(getUserBegin());
-          const userResp = await UserAPI.getUser();
-          dispatch(getUserSuccess(userResp.data));
-        })
-        .catch(() => {
-          dispatch(authFailure());
-          dispatch(getUserFailure());
-        });
-    };
-    login();
-  }, []);
-
-  const { error } = useAppSelector((state) => state.user);
-  console.log(error);
+const HomePage: React.FC = () => {
   return (
-    <button className="bg-blue-500 text-white text-7xl font-bold px-6 py-3 rounded">
-      {phone}
-    </button>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#000000',
+          colorLink: '#000000',
+          borderRadius: 8,
+        },
+      }}
+    >
+      <div className="min-h-screen bg-white">
+        <Header />
+        <main>
+          <HeroSection />
+          <CategorySection />
+          <FeaturedProducts />
+          <BrandSection />
+          <NewsletterSection />
+        </main>
+        <Footer />
+      </div>
+    </ConfigProvider>
   );
-}
+};
+
+export default HomePage;
