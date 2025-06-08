@@ -31,3 +31,40 @@ body {
     @apply text-lg font-bold;
   }
 }
+
+/* @tailwind utilities;
+
+.custom-dots .slick-dots li button {
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-radius: 50%;
+}
+
+.custom-dots .slick-dots li.slick-active button {
+  background: white !important;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+* {
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif !important;
+}
+
+.ant-layout-footer,
+.ant-layout-footer *,
+.ant-btn,
+.ant-typography {
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif !important;
+}
+
+body {
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-feature-settings: 'kern' 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+} */
