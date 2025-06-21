@@ -8,6 +8,7 @@ export interface IBaseQuery {
   pageSize?: string | number;
   keyword?: string;
   searchField?: string | string[];
+  populate?: string | string[];
 }
 
 export interface ICreateCategory {

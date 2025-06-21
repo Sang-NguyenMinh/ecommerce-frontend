@@ -14,16 +14,24 @@ import {
   Row,
   Col,
   Modal,
-  message,
+  Tooltip,
+  Badge,
 } from 'antd';
 import {
   PlusOutlined,
-  DeleteOutlined,
   SettingOutlined,
   TagsOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   InfoCircleOutlined,
+  CalendarOutlined,
+  ExclamationCircleOutlined,
+  FolderOutlined,
+  ArrowRightOutlined,
+  TagOutlined,
+  EditOutlined,
+  SaveOutlined,
+  CloseOutlined,
 } from '@ant-design/icons';
 
 import {
@@ -36,94 +44,87 @@ import {
   StatisticsCards,
   useModal,
 } from '../products/component/custom';
+import {
+  useCreateVariation,
+  useDeleteVariation,
+  useUpdateVariation,
+  useVariations,
+} from '@/hooks/variation';
+import {
+  useCreateVariationOption,
+  useDeleteVariationOption,
+  useVariationOptions,
+} from '@/hooks/variation-option';
+import { useCategories } from '@/hooks/category';
+import {
+  useCategoryVariations,
+  useCreateCategoryVariation,
+  useDeleteCategoryVariation,
+  useUpdateCategoryVariation,
+} from '@/hooks/category-variation';
 
 const { Text } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
 
 interface VariationData {
-  id: string;
+  _id: string;
   name: string;
   description?: string;
   isActive: boolean;
   createdAt?: string;
-  optionsCount: number;
-  categoriesCount: number;
-  options: VariationOptionData[];
+  variationOptionCount: number;
 }
-
-interface VariationOptionData {
-  id: string;
-  value: string;
-  variationId: string;
-}
-
-const mockVariations: VariationData[] = [
-  {
-    id: '1',
-    name: 'Màu sắc',
-    description: 'Các tùy chọn màu sắc cho sản phẩm',
-    isActive: true,
-    createdAt: '2024-01-15T10:00:00Z',
-    optionsCount: 8,
-    categoriesCount: 5,
-    options: [
-      { id: '1', value: 'Đỏ', variationId: '1' },
-      { id: '2', value: 'Xanh', variationId: '1' },
-      { id: '3', value: 'Trắng', variationId: '1' },
-      { id: '4', value: 'Đen', variationId: '1' },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Kích thước',
-    description: 'Các tùy chọn kích thước',
-    isActive: true,
-    createdAt: '2024-01-20T14:30:00Z',
-    optionsCount: 5,
-    categoriesCount: 3,
-    options: [
-      { id: '5', value: 'S', variationId: '2' },
-      { id: '6', value: 'M', variationId: '2' },
-      { id: '7', value: 'L', variationId: '2' },
-      { id: '8', value: 'XL', variationId: '2' },
-      { id: '9', value: 'XXL', variationId: '2' },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Chất liệu',
-    description: 'Loại chất liệu sản phẩm',
-    isActive: false,
-    createdAt: '2024-02-01T09:15:00Z',
-    optionsCount: 3,
-    categoriesCount: 2,
-    options: [
-      { id: '10', value: 'Cotton', variationId: '3' },
-      { id: '11', value: 'Polyester', variationId: '3' },
-      { id: '12', value: 'Linen', variationId: '3' },
-    ],
-  },
-];
-
-const mockCategories = [
-  { id: '1', categoryName: 'Áo thun' },
-  { id: '2', categoryName: 'Quần jean' },
-  { id: '3', categoryName: 'Giày dép' },
-  { id: '4', categoryName: 'Phụ kiện' },
-];
 
 const VariationManagement = () => {
   const [form] = Form.useForm();
   const [optionForm] = Form.useForm();
   const [categoryVariationForm] = Form.useForm();
 
+  const { data: categoryRes, isLoading: isCategoryLoading } = useCategories();
+
+  const { data: variationRes, isLoading: isVariationLoading } = useVariations();
+  const { mutate: createVariation, isPending: isCreating } =
+    useCreateVariation();
+  const { mutate: updateVariation, isPending: isUpdating } =
+    useUpdateVariation();
+  const { mutate: deleteVariation, isPending: isDeleting } =
+    useDeleteVariation();
   const [selectedVariation, setSelectedVariation] =
     useState<VariationData | null>(null);
+  const { data: variationOptionRes, isLoading: isVariationOptionLoading } =
+    useVariationOptions({ variationId: selectedVariation?._id || null });
+  const { mutate: createVariationOption, isPending: isCreatingOption } =
+    useCreateVariationOption();
+
+  const { mutate: deleteVariationOption, isPending: isDeletingOption } =
+    useDeleteVariationOption();
+
+  const { data: categoryVariationRes, isLoading: isCategoryVariationLoading } =
+    useCategoryVariations();
+  const {
+    mutate: createCategoryVariation,
+    isPending: isCreatingCategoryVariation,
+  } = useCreateCategoryVariation();
+
+  const {
+    mutate: updateCategoryVariation,
+    isPending: isUpdatingCategoryVariation,
+  } = useUpdateCategoryVariation();
+
+  const {
+    mutate: deleteCategoryVariation,
+    isPending: isDeletingCategoryVariation,
+  } = useDeleteCategoryVariation();
+
+  console.log('Variation Data:', variationOptionRes);
+
+  const [editingCategoryVariation, setEditingCategoryVariation] =
+    useState<any>(null);
 
   const [selectedVariationForOptions, setSelectedVariationForOptions] =
     useState<string | null>(null);
-  const [variations, setVariations] = useState<VariationData[]>(mockVariations);
+
   const [isOptionsModalVisible, setIsOptionsModalVisible] = useState(false);
   const [isCategoryVariationModalVisible, setIsCategoryVariationModalVisible] =
     useState(false);
@@ -135,21 +136,33 @@ const VariationManagement = () => {
     closeModal,
   } = useModal();
 
+  const handleEditCategoryVariation = (item: any) => {
+    setEditingCategoryVariation(item);
+    categoryVariationForm.setFieldsValue({
+      categoryId: item.categoryId._id,
+      variationId: item.variationId._id,
+      isRequired: item.isRequired,
+    });
+  };
+
   // Statistics data
   const statisticsData: StatisticItem[] = useMemo(() => {
-    const activeVariations = variations.filter((v) => v.isActive);
-    const totalOptions = variations.reduce((sum, v) => sum + v.optionsCount, 0);
+    const activeVariations = variationRes?.data.filter((v) => v.isActive);
+    const totalOptions = variationRes?.data.reduce(
+      (sum, v) => sum + v.variationOptionCount,
+      0,
+    );
 
     return [
       {
         title: 'Tổng biến thể',
-        value: variations.length,
+        value: variationRes?.total,
         prefix: <TagsOutlined />,
         valueStyle: { color: '#1890ff' },
       },
       {
         title: 'Đang hoạt động',
-        value: activeVariations.length,
+        value: activeVariations?.length,
         prefix: <CheckCircleOutlined />,
         valueStyle: { color: '#52c41a' },
       },
@@ -161,14 +174,13 @@ const VariationManagement = () => {
       },
       {
         title: 'Tạm dừng',
-        value: variations.length - activeVariations.length,
+        value: variationRes?.total - activeVariations?.length,
         prefix: <ClockCircleOutlined />,
         valueStyle: { color: '#fa8c16' },
       },
     ];
-  }, [variations]);
+  }, [variationRes]);
 
-  // Variation columns
   const variationColumns = [
     {
       title: 'Tên biến thể',
@@ -180,7 +192,7 @@ const VariationManagement = () => {
           <Text strong>{text}</Text>
           <div>
             <Text type="secondary" className="text-xs">
-              ID: {record.id}
+              ID: {record._id}
             </Text>
           </div>
         </div>
@@ -199,15 +211,16 @@ const VariationManagement = () => {
     },
     {
       title: 'Số tùy chọn',
-      dataIndex: 'optionsCount',
-      key: 'optionsCount',
+      dataIndex: 'variationOptionCount',
+      key: 'variationOptionCount',
       width: 120,
-      render: (count: number, record: VariationData) => (
+      render: (_, record: VariationData) => (
         <Space>
-          <Tag color="blue">{count} tùy chọn</Tag>
+          <Tag color="blue">{record.variationOptionCount} tùy chọn</Tag>
           <Button
             type="link"
             size="small"
+            className="text-red-900"
             onClick={() => handleManageOptions(record)}
             icon={<SettingOutlined />}
           >
@@ -264,7 +277,7 @@ const VariationManagement = () => {
               record.categoriesCount > 0
                 ? 'Biến thể này đang được sử dụng bởi một số danh mục. Xóa sẽ ảnh hưởng đến các sản phẩm liên quan.'
                 : undefined,
-            onClick: () => handleDeleteVariation(record.id),
+            onClick: () => deleteVariation(record._id),
           },
         ];
         return <ActionButtons actions={actions} />;
@@ -272,9 +285,8 @@ const VariationManagement = () => {
     },
   ];
 
-  // Event handlers
   const handleEditVariation = useCallback(
-    (variation: VariationData) => {
+    (variation: any) => {
       setSelectedVariation(variation);
       openModal(variation, true);
       form.setFieldsValue({
@@ -292,32 +304,27 @@ const VariationManagement = () => {
     setSelectedVariation(null);
   }, [form, openModal]);
 
-  const handleSaveVariation = async () => {
+  const handleSavingVariation = async () => {
     try {
       const values = await form.validateFields();
 
       if (isEditing && selectedVariation) {
-        const updatedVariation = {
-          ...selectedVariation,
-          ...values,
-        };
-        setVariations((prev) =>
-          prev.map((v) =>
-            v.id === selectedVariation.id ? updatedVariation : v,
-          ),
-        );
-        message.success('Cập nhật biến thể thành công!');
+        await updateVariation({
+          id: selectedVariation._id,
+          data: {
+            name: values.name,
+            description: values.description,
+            isActive: values.isActive,
+          },
+        });
       } else {
-        const newVariation: VariationData = {
-          id: Date.now().toString(),
-          ...values,
-          createdAt: new Date().toISOString(),
-          optionsCount: 0,
-          categoriesCount: 0,
-          options: [],
+        console.log('Creating new variation with values:', values);
+        const newVariation: any = {
+          name: values.name,
+          description: values.description,
+          isActive: values.isActive,
         };
-        setVariations((prev) => [...prev, newVariation]);
-        message.success('Tạo biến thể mới thành công!');
+        await createVariation(newVariation);
       }
 
       closeModal();
@@ -328,13 +335,8 @@ const VariationManagement = () => {
     }
   };
 
-  const handleDeleteVariation = (id: string) => {
-    setVariations((prev) => prev.filter((v) => v.id !== id));
-    message.success('Xóa biến thể thành công!');
-  };
-
-  const handleManageOptions = (variation: VariationData) => {
-    setSelectedVariationForOptions(variation.id);
+  const handleManageOptions = (variation: any) => {
+    setSelectedVariation(variation);
     setIsOptionsModalVisible(true);
   };
 
@@ -342,53 +344,47 @@ const VariationManagement = () => {
     try {
       const values = await optionForm.validateFields();
 
-      if (!selectedVariationForOptions) return;
+      if (!selectedVariation) return;
 
-      const newOption: VariationOptionData = {
-        id: Date.now().toString(),
+      const newOption: any = {
+        name: values.name,
         value: values.value,
-        variationId: selectedVariationForOptions,
+        variationId: selectedVariation._id,
       };
 
-      setVariations((prev) =>
-        prev.map((v) =>
-          v.id === selectedVariationForOptions
-            ? {
-                ...v,
-                options: [...v.options, newOption],
-                optionsCount: v.optionsCount + 1,
-              }
-            : v,
-        ),
-      );
+      await createVariationOption(newOption);
 
       optionForm.resetFields();
-      message.success('Thêm tùy chọn thành công!');
     } catch (error) {
       console.error('Error adding option:', error);
     }
   };
 
-  const handleDeleteOption = (optionId: string) => {
-    if (!selectedVariationForOptions) return;
+  const handleSavingCategoryVariation = async () => {
+    try {
+      const values = await categoryVariationForm.validateFields();
 
-    setVariations((prev) =>
-      prev.map((v) =>
-        v.id === selectedVariationForOptions
-          ? {
-              ...v,
-              options: v.options.filter((opt) => opt.id !== optionId),
-              optionsCount: v.optionsCount - 1,
-            }
-          : v,
-      ),
-    );
-    message.success('Xóa tùy chọn thành công!');
+      const categoryVariation: any = {
+        categoryId: values.categoryId,
+        variationId: values.variationId,
+        isRequired: values.isRequired,
+      };
+
+      console.log('id', editingCategoryVariation._id);
+
+      if (editingCategoryVariation) {
+        await updateCategoryVariation({
+          id: editingCategoryVariation._id,
+          data: categoryVariation,
+        });
+        setEditingCategoryVariation(null);
+      } else await createCategoryVariation(categoryVariation);
+
+      categoryVariationForm.resetFields();
+    } catch (error) {
+      console.error('Error saving category variation:', error);
+    }
   };
-
-  const selectedVariationData = selectedVariationForOptions
-    ? variations.find((v) => v.id === selectedVariationForOptions)
-    : null;
 
   return (
     <div className="p-6">
@@ -417,7 +413,7 @@ const VariationManagement = () => {
       <Card>
         <CustomTable
           columns={variationColumns}
-          dataSource={variations}
+          dataSource={variationRes?.data}
           loading={false}
           rowKey="id"
           paginationConfig={{
@@ -434,7 +430,7 @@ const VariationManagement = () => {
         title={isEditing ? 'Chỉnh sửa biến thể' : 'Thêm biến thể mới'}
         open={isModalVisible}
         onCancel={closeModal}
-        onSave={handleSaveVariation}
+        onSave={handleSavingVariation}
         saveText={isEditing ? 'Cập nhật' : 'Tạo biến thể'}
         loading={false}
         width={600}
@@ -495,7 +491,7 @@ const VariationManagement = () => {
       </CustomModal>
 
       <Modal
-        title={`Quản lý tùy chọn - ${selectedVariationData?.name}`}
+        title={`Quản lý tùy chọn - ${selectedVariation?.name}`}
         open={isOptionsModalVisible}
         onCancel={() => setIsOptionsModalVisible(false)}
         width={800}
@@ -505,14 +501,26 @@ const VariationManagement = () => {
           <Card title="Thêm tùy chọn mới" size="small">
             <Form form={optionForm} layout="inline" onFinish={handleAddOption}>
               <Form.Item
-                name="value"
+                label="Tên"
+                labelAlign="right"
+                name="name"
                 rules={[
-                  { required: true, message: 'Vui lòng nhập giá trị' },
-                  { max: 50, message: 'Giá trị không được quá 50 ký tự' },
+                  { required: true, message: 'Vui lòng nhập tên' },
+                  { max: 50, message: 'Tên không được quá 50 ký tự' },
                 ]}
-                className="flex-1"
               >
                 <Input placeholder="Ví dụ: Đỏ, Size M, Cotton..." />
+              </Form.Item>
+
+              <Form.Item
+                label="Giá trị "
+                name="value"
+                rules={[
+                  { message: 'Vui lòng nhập giá trị' },
+                  { max: 50, message: 'Giá trị không được quá 50 ký tự' },
+                ]}
+              >
+                <Input placeholder="" />
               </Form.Item>
               <Form.Item>
                 <Button
@@ -527,7 +535,7 @@ const VariationManagement = () => {
           </Card>
 
           <Card title="Danh sách tùy chọn hiện có" size="small">
-            {selectedVariationData?.options.length === 0 ? (
+            {variationOptionRes?.total === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <SettingOutlined className="text-4xl mb-2" />
                 <div>Chưa có tùy chọn nào</div>
@@ -535,28 +543,46 @@ const VariationManagement = () => {
               </div>
             ) : (
               <div className="space-y-2">
-                {selectedVariationData?.options.map((option) => (
+                {variationOptionRes?.data.map((option: any) => (
                   <div
-                    key={option.id}
+                    key={option._id}
                     className="flex items-center justify-between p-3 border rounded-lg"
                   >
-                    <div>
-                      <Text strong>{option.value}</Text>
+                    <div className="flex-1">
+                      <div className="mb-1">
+                        <Tooltip title={option.name} placement="topLeft">
+                          <Text strong className="text-base">
+                            {option.name}
+                          </Text>
+                        </Tooltip>
+                      </div>
+                      {option.value && (
+                        <div className="mb-1">
+                          <Text type="secondary" className="text-sm">
+                            Giá trị: <Text code>{option.value}</Text>
+                          </Text>
+                        </div>
+                      )}
                       <div>
                         <Text type="secondary" className="text-xs">
-                          ID: {option.id}
+                          ID: {option._id}
                         </Text>
                       </div>
                     </div>
-                    <Button
-                      type="text"
-                      danger
-                      size="small"
-                      icon={<DeleteOutlined />}
-                      onClick={() => handleDeleteOption(option.id)}
-                    >
-                      Xóa
-                    </Button>
+                    <Space>
+                      <ActionButtons
+                        actions={[
+                          {
+                            type: 'delete',
+                            tooltip: 'Xóa',
+                            confirmTitle:
+                              'Bạn có chắc chắn muốn xóa tùy chọn này?',
+
+                            onClick: () => deleteVariationOption(option._id),
+                          },
+                        ]}
+                      />
+                    </Space>
                   </div>
                 ))}
               </div>
@@ -569,16 +595,20 @@ const VariationManagement = () => {
       <Modal
         title="Cấu hình biến thể cho danh mục"
         open={isCategoryVariationModalVisible}
-        onCancel={() => setIsCategoryVariationModalVisible(false)}
-        width={900}
+        onCancel={() => {
+          setIsCategoryVariationModalVisible(false);
+          setEditingCategoryVariation(null);
+          categoryVariationForm.resetFields();
+        }}
+        width={'50%'}
         footer={null}
       >
         <div className="space-y-4">
           <div className="bg-yellow-50 p-4 rounded-lg">
             <Space align="start">
-              <InfoCircleOutlined className="text-yellow-600 mt-1" />
+              <InfoCircleOutlined />
               <div>
-                <Text className="text-sm text-yellow-800">
+                <Text className="text-sm ">
                   <strong>Hướng dẫn:</strong> Cấu hình các biến thể cho từng
                   danh mục sản phẩm. Khi tạo sản phẩm thuộc danh mục này, hệ
                   thống sẽ yêu cầu nhập thông tin cho các biến thể đã cấu hình.
@@ -587,10 +617,24 @@ const VariationManagement = () => {
             </Space>
           </div>
 
-          <Card title="Thêm cấu hình mới" size="small">
-            <Form form={categoryVariationForm} layout="vertical">
+          <Card
+            title={
+              <Space>
+                {editingCategoryVariation ? <EditOutlined /> : <PlusOutlined />}
+                {editingCategoryVariation
+                  ? 'Cập nhật cấu hình'
+                  : 'Thêm cấu hình mới'}
+              </Space>
+            }
+            size="small"
+          >
+            <Form
+              form={categoryVariationForm}
+              layout="vertical"
+              onFinish={handleSavingCategoryVariation}
+            >
               <Row gutter={16}>
-                <Col span={8}>
+                <Col span={7}>
                   <Form.Item
                     label="Danh mục"
                     name="categoryId"
@@ -598,16 +642,16 @@ const VariationManagement = () => {
                       { required: true, message: 'Vui lòng chọn danh mục' },
                     ]}
                   >
-                    <Select placeholder="Chọn danh mục">
-                      {mockCategories.map((cat) => (
-                        <Option key={cat.id} value={cat.id}>
+                    <Select placeholder="Chọn danh mục" showSearch>
+                      {categoryRes?.data.map((cat: any) => (
+                        <Option key={cat._id} value={cat._id}>
                           {cat.categoryName}
                         </Option>
                       ))}
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={8}>
+                <Col span={7}>
                   <Form.Item
                     label="Biến thể"
                     name="variationId"
@@ -615,11 +659,11 @@ const VariationManagement = () => {
                       { required: true, message: 'Vui lòng chọn biến thể' },
                     ]}
                   >
-                    <Select placeholder="Chọn biến thể">
-                      {variations
+                    <Select placeholder="Chọn biến thể" showSearch>
+                      {variationRes?.data
                         .filter((v) => v.isActive)
-                        .map((variation) => (
-                          <Option key={variation.id} value={variation.id}>
+                        .map((variation: any) => (
+                          <Option key={variation._id} value={variation._id}>
                             {variation.name}
                           </Option>
                         ))}
@@ -635,23 +679,132 @@ const VariationManagement = () => {
                     <Switch defaultChecked />
                   </Form.Item>
                 </Col>
-                <Col span={4}>
+                <Col span={6}>
                   <Form.Item label=" ">
-                    <Button type="primary" icon={<PlusOutlined />}>
-                      Thêm
-                    </Button>
+                    <Space>
+                      <Button
+                        type="primary"
+                        htmlType="submit"
+                        icon={
+                          editingCategoryVariation ? (
+                            <SaveOutlined />
+                          ) : (
+                            <PlusOutlined />
+                          )
+                        }
+                      >
+                        {editingCategoryVariation ? 'Cập nhật' : 'Thêm'}
+                      </Button>
+                      {editingCategoryVariation && (
+                        <Button
+                          onClick={() => {
+                            setEditingCategoryVariation(null);
+                            categoryVariationForm.resetFields();
+                          }}
+                          icon={<CloseOutlined />}
+                        >
+                          Hủy
+                        </Button>
+                      )}
+                    </Space>
                   </Form.Item>
                 </Col>
               </Row>
             </Form>
           </Card>
 
-          <Card title="Cấu hình hiện có" size="small">
-            <div className="text-center py-8 text-gray-500">
-              <SettingOutlined className="text-4xl mb-2" />
-              <div>Chưa có cấu hình nào</div>
-              <Text type="secondary">Thêm cấu hình đầu tiên ở trên</Text>
-            </div>
+          <Card
+            title={
+              <Space>
+                <SettingOutlined />
+                <Text>Cấu hình hiện có</Text>
+                {categoryVariationRes?.total > 0 && (
+                  <Badge count={categoryVariationRes.total} />
+                )}
+              </Space>
+            }
+            size="small"
+          >
+            {categoryVariationRes?.total === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <SettingOutlined className="text-5xl mb-3 text-gray-300" />
+                <div className="text-lg mb-2">Chưa có cấu hình nào</div>
+                <Text type="secondary">
+                  Thêm cấu hình đầu tiên ở trên để bắt đầu
+                </Text>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {categoryVariationRes?.data.map((item: any) => (
+                  <div
+                    key={item._id}
+                    className={`p-4 border rounded-lg transition-all duration-200 hover:shadow-md ${
+                      editingCategoryVariation?._id === item._id
+                        ? 'border-blue-400 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="flex items-center gap-2">
+                            <Tag color="blue" className="mb-0">
+                              <FolderOutlined className="mr-1" />
+                              {item.categoryId?.categoryName}
+                            </Tag>
+                            <ArrowRightOutlined className="text-gray-400" />
+                            <Tag color="green" className="mb-0">
+                              <TagOutlined className="mr-1" />
+                              {item.variationId?.name}
+                            </Tag>
+                          </div>
+                          {item.isRequired && (
+                            <Tag color="red" className="mb-0">
+                              <ExclamationCircleOutlined className="mr-1" />
+                              Bắt buộc
+                            </Tag>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <span>ID: {item._id}</span>
+                          {item.createdAt && (
+                            <span>
+                              <CalendarOutlined className="mr-1" />
+                              Tạo:{' '}
+                              {new Date(item.createdAt).toLocaleDateString(
+                                'vi-VN',
+                              )}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <Space>
+                        <ActionButtons
+                          actions={[
+                            {
+                              type: 'edit',
+                              tooltip: 'Chỉnh sửa',
+                              onClick: () => {
+                                handleEditCategoryVariation(item);
+                              },
+                            },
+                            {
+                              type: 'delete',
+                              tooltip: 'Xóa',
+                              confirmTitle:
+                                'Bạn có chắc chắn muốn xóa cấu hình này?',
+                              onClick: () => deleteCategoryVariation(item._id),
+                            },
+                          ]}
+                        />
+                      </Space>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
         </div>
       </Modal>

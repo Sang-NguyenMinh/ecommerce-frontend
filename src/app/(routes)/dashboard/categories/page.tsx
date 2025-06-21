@@ -249,29 +249,6 @@ const CategoryManagement = () => {
     },
   ];
 
-  // Event handlers
-  // const handleEdit = useCallback(
-  //   (category: CategoryData) => {
-  //     setSelectedCategory(category);
-  //     openModal(category, true);
-  //     form.setFieldsValue({
-  //       categoryName: category.categoryName,
-  //       parentCategory: category.parentId,
-  //       status: category.status,
-  //     });
-
-  //     setFileList([
-  //       {
-  //         uid: `${category.id}-thumbnail`,
-  //         name: `image-${category.id}.jpg`,
-  //         status: 'done',
-  //         url: category.thumbnail,
-  //       },
-  //     ]);
-  //   },
-  //   [form, openModal],
-  // );
-
   const handleEdit = useCallback(
     (category: CategoryData) => {
       setSelectedCategory(category);
@@ -302,17 +279,11 @@ const CategoryManagement = () => {
     [form, openModal],
   );
 
-  // const handleAddNew = useCallback(() => {
-  //   openModal();
-  //   form.resetFields();
-  //   setSelectedCategory(null);
-  // }, [form, openModal]);
-
   const handleAddNew = useCallback(() => {
     openModal();
     form.resetFields();
     setSelectedCategory(null);
-    setSelectedVariations([]); // Reset variations
+    setSelectedVariations([]);
   }, [form, openModal]);
 
   const handleSaveCategory = async () => {
@@ -394,59 +365,6 @@ const CategoryManagement = () => {
       ),
     );
   };
-
-  // const handleSaveCategory = async () => {
-  //   try {
-  //     const values = await form.validateFields();
-
-  //     const formData = new FormData();
-  //     formData.append('categoryName', values.categoryName || '');
-  //     formData.append('status', values.status || true);
-  //     if (values.parentCategory)
-  //       formData.append('parentCategory', values.parentCategory);
-
-  //     // Phân loại files
-  //     const newFiles = [];
-  //     const existingUrls = [];
-
-  //     fileList.forEach((file) => {
-  //       if (file?.originFileObj) {
-  //         newFiles.push(file.originFileObj);
-  //       } else if (file.url && !file.originFileObj) {
-  //         existingUrls.push(file.url);
-  //       }
-  //     });
-
-  //     newFiles.forEach((file) => {
-  //       formData.append('thumbnail', file);
-  //     });
-
-  //     // QUAN TRỌNG: Gửi existingThumbnails dưới dạng JSON string
-  //     if (existingUrls.length > 0) {
-  //       formData.append('existingThumbnail', JSON.stringify(existingUrls));
-  //     }
-
-  //     for (const pair of formData.entries()) {
-  //       console.log(pair[0], pair[1]);
-  //     }
-
-  //     if (isEditing) {
-  //       await updateCategory({
-  //         id: selectedCategory.id,
-  //         data: formData,
-  //       });
-  //     } else {
-  //       await createCategory(formData);
-  //     }
-
-  //     closeModal();
-  //     form.resetFields();
-  //     setSelectedCategory(null);
-  //     setFileList([]);
-  //   } catch (error) {
-  //     console.error('Error saving category:', error);
-  //   }
-  // };
 
   // Available parent categories (exclude self when editing)
   const availableParentCategories = useMemo(() => {

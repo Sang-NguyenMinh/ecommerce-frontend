@@ -1,4 +1,4 @@
-import { VariationAPI } from '@/services/VariationPAIs';
+import { VariationAPI } from '@/services/VariationAPIs';
 import {
   useCreateItem,
   useDeleteItem,
