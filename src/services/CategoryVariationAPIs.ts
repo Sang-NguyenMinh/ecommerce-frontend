@@ -11,7 +11,6 @@ export const CategoryVariationAPIs = {
     return axios.get(`${CATEGORY_VARIATION_URL}`, {
       params: {
         ...params,
-        populate: ['variationId', 'categoryId'],
       },
     });
   },
@@ -26,5 +25,9 @@ export const CategoryVariationAPIs = {
 
   deleteOne: (id: string) => {
     return axios.delete(`${CATEGORY_VARIATION_URL}/${id}`);
+  },
+
+  getByCategoryId: (id: string) => {
+    return axios.get(`${CATEGORY_VARIATION_URL}/by-category/${id}`);
   },
 };

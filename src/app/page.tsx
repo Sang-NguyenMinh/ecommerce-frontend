@@ -2,7 +2,6 @@
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import HeroSection from '@/components/layout/HeroSection';
-import CategorySection from '@/components/layout/CategorySection';
 import FeaturedProducts from '@/components/FeaturedProducts';
 import NewsletterSection from '@/components/layout/NewsletterSection';
 import { useCategories } from '@/hooks/category';

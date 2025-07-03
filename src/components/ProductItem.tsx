@@ -1,11 +1,9 @@
 import { Image, Typography } from 'antd';
 
-import type { IProduct } from '@/types/product';
-
 const { Text } = Typography;
 
 interface ProductItemProps {
-  product: IProduct;
+  product: any;
   className?: string;
   onClick?: (productId: number) => void;
 }
@@ -28,7 +26,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ product, onClick }) => {
       className={`flex flex-col gap-2 cursor-pointer `}
       onClick={handleClick}
     >
-      {/* Product Image */}
       <div className="h-74 w-60 overflow-hidden rounded-lg bg-gray-100">
         <Image
           alt="Product Image"
@@ -39,7 +36,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ product, onClick }) => {
         />
       </div>
 
-      {/* Colors */}
       <div className="flex gap-1">
         {colors.map((color, index) => (
           <div
@@ -51,7 +47,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ product, onClick }) => {
         ))}
       </div>
 
-      {/* Product Info */}
       <div>
         <Text className="text-sm block">{name}</Text>
         <Text className="text-gray-500 font-medium text-sm">

@@ -1,13 +1,10 @@
 'use client';
 import {
-  Slider,
   Select,
   Button,
   Card,
   Badge,
-  Rate,
   Breadcrumb,
-  Space,
   Typography,
   Row,
   Col,
@@ -16,15 +13,7 @@ import {
   Checkbox,
   Radio,
 } from 'antd';
-import {
-  FilterOutlined,
-  HeartOutlined,
-  ShareAltOutlined,
-  ShoppingCartOutlined,
-  AppstoreOutlined,
-  UnorderedListOutlined,
-  StarFilled,
-} from '@ant-design/icons';
+import { FilterOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 
 const { Title, Text } = Typography;
@@ -55,15 +44,11 @@ interface Product {
 }
 
 const ProductPage: React.FC = () => {
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 3000000]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [sortBy, setSortBy] = useState('popularity');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Subcategories data
   const subcategories: Category[] = [
     {
       id: 'home',
@@ -231,17 +216,12 @@ const ProductPage: React.FC = () => {
     );
   };
 
-  // Filter products based on selected subcategory
   const filteredProducts = products.filter((product) => {
     if (selectedSubcategory && selectedSubcategory !== 'all') {
       return product.subcategory === selectedSubcategory;
     }
     return true;
   });
-
-  const getProductCountForSubcategory = (subcategoryId: string) => {
-    return products.filter((p) => p.subcategory === subcategoryId).length;
-  };
 
   const SubcategoryCard: React.FC<{ category: Category }> = ({ category }) => (
     <div
@@ -326,7 +306,6 @@ const ProductPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Breadcrumb */}
       <div className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-3">
           <Breadcrumb>
@@ -339,13 +318,11 @@ const ProductPage: React.FC = () => {
       </div>
 
       <div className="container mx-auto px-4 py-6">
-        {/* Category Header */}
         <div className="bg-white p-6 mb-6">
           <Title level={2} className="!mb-6 font-bold">
             ÁO THUN NAM VÀNG
           </Title>
 
-          {/* Subcategory Selection */}
           <Row gutter={[24, 24]} className="mb-8">
             {subcategories.map((category) => (
               <Col key={category.id} xs={24} sm={8} md={8}>
@@ -356,14 +333,12 @@ const ProductPage: React.FC = () => {
         </div>
 
         <Row gutter={24}>
-          {/* Sidebar Filters */}
           <Col xs={24} lg={6}>
             <Card className="mb-6">
               <Title level={4} className="flex items-center gap-2 !mb-4">
                 <FilterOutlined /> Phù hợp với
               </Title>
 
-              {/* Category Filter */}
               <div className="mb-6">
                 <Radio.Group
                   value={selectedSubcategory}
@@ -381,7 +356,6 @@ const ProductPage: React.FC = () => {
 
               <Divider />
 
-              {/* Size Filter */}
               <div className="mb-6">
                 <Title level={5}>Kích cỡ</Title>
                 <div className="grid grid-cols-4 gap-2">
@@ -403,7 +377,6 @@ const ProductPage: React.FC = () => {
 
               <Divider />
 
-              {/* Color Filter */}
               <div className="mb-6">
                 <Title level={5}>Màu sắc</Title>
                 <div className="space-y-2">
@@ -429,7 +402,6 @@ const ProductPage: React.FC = () => {
 
               <Divider />
 
-              {/* Material Filter */}
               <div className="mb-6">
                 <Title level={5}>Chất liệu</Title>
                 <div className="space-y-2">
@@ -444,9 +416,7 @@ const ProductPage: React.FC = () => {
             </Card>
           </Col>
 
-          {/* Main Content */}
           <Col xs={24} lg={18}>
-            {/* Products Header */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
                 <Text className="text-lg font-medium">
@@ -454,7 +424,6 @@ const ProductPage: React.FC = () => {
                   kết quả
                 </Text>
 
-                {/* Active filters */}
                 <div className="flex items-center gap-2">
                   {selectedSubcategory && (
                     <Tag
@@ -491,7 +460,6 @@ const ProductPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Products Grid */}
             <Row gutter={[12, 16]}>
               {filteredProducts.map((product) => (
                 <Col key={product.id} xs={24} sm={12} md={8} lg={6}>
@@ -500,7 +468,6 @@ const ProductPage: React.FC = () => {
               ))}
             </Row>
 
-            {/* No results message */}
             {filteredProducts.length === 0 && (
               <div className="text-center py-8">
                 <Text type="secondary">
@@ -509,7 +476,6 @@ const ProductPage: React.FC = () => {
               </div>
             )}
 
-            {/* Pagination */}
             {filteredProducts.length > 0 && (
               <div className="flex justify-center mt-8">
                 <Button.Group>

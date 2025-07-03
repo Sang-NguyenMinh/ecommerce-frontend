@@ -93,7 +93,7 @@ const VariationManagement = () => {
   const [selectedVariation, setSelectedVariation] =
     useState<VariationData | null>(null);
   const { data: variationOptionRes, isLoading: isVariationOptionLoading } =
-    useVariationOptions({ variationId: selectedVariation?._id || null });
+    useVariationOptions({ variationId: selectedVariation?._id });
   const { mutate: createVariationOption, isPending: isCreatingOption } =
     useCreateVariationOption();
 
@@ -117,13 +117,8 @@ const VariationManagement = () => {
     isPending: isDeletingCategoryVariation,
   } = useDeleteCategoryVariation();
 
-  console.log('Variation Data:', variationOptionRes);
-
   const [editingCategoryVariation, setEditingCategoryVariation] =
     useState<any>(null);
-
-  const [selectedVariationForOptions, setSelectedVariationForOptions] =
-    useState<string | null>(null);
 
   const [isOptionsModalVisible, setIsOptionsModalVisible] = useState(false);
   const [isCategoryVariationModalVisible, setIsCategoryVariationModalVisible] =
@@ -145,7 +140,6 @@ const VariationManagement = () => {
     });
   };
 
-  // Statistics data
   const statisticsData: StatisticItem[] = useMemo(() => {
     const activeVariations = variationRes?.data.filter((v) => v.isActive);
     const totalOptions = variationRes?.data.reduce(
@@ -186,7 +180,7 @@ const VariationManagement = () => {
       title: 'Tên biến thể',
       dataIndex: 'name',
       key: 'name',
-      width: 200,
+      width: 280,
       render: (text: string, record: VariationData) => (
         <div>
           <Text strong>{text}</Text>
@@ -353,7 +347,6 @@ const VariationManagement = () => {
       };
 
       await createVariationOption(newOption);
-
       optionForm.resetFields();
     } catch (error) {
       console.error('Error adding option:', error);
@@ -369,8 +362,6 @@ const VariationManagement = () => {
         variationId: values.variationId,
         isRequired: values.isRequired,
       };
-
-      console.log('id', editingCategoryVariation._id);
 
       if (editingCategoryVariation) {
         await updateCategoryVariation({
@@ -425,7 +416,6 @@ const VariationManagement = () => {
         />
       </Card>
 
-      {/* Variation Modal */}
       <CustomModal
         title={isEditing ? 'Chỉnh sửa biến thể' : 'Thêm biến thể mới'}
         open={isModalVisible}
@@ -591,7 +581,6 @@ const VariationManagement = () => {
         </div>
       </Modal>
 
-      {/* Category Variation Configuration Modal */}
       <Modal
         title="Cấu hình biến thể cho danh mục"
         open={isCategoryVariationModalVisible}

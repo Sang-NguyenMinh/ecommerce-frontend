@@ -1,4 +1,3 @@
-// 1. components/common/PageHeader.tsx
 import React from 'react';
 import { Typography, Button, Space } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
@@ -48,7 +47,6 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   );
 };
 
-// 2. components/common/StatisticsCards.tsx
 import { Row, Col, Card, Statistic } from 'antd';
 
 export interface StatisticItem {
@@ -89,7 +87,6 @@ export const StatisticsCards: React.FC<StatisticsCardsProps> = ({
   );
 };
 
-// 3. components/common/CustomTable.tsx
 import { Table, TableProps } from 'antd';
 
 interface CustomTableProps extends Omit<TableProps<any>, 'pagination'> {
@@ -132,7 +129,6 @@ export const CustomTable: React.FC<CustomTableProps> = ({
   return tableElement;
 };
 
-// 4. components/common/CustomModal.tsx
 import { Modal, ModalProps } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 
@@ -185,7 +181,6 @@ export const CustomModal: React.FC<CustomModalProps> = ({
   );
 };
 
-// 5. components/common/ImageUpload.tsx
 import { Upload, Form } from 'antd';
 import { PictureOutlined } from '@ant-design/icons';
 
@@ -272,7 +267,6 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   };
 
   const renderButton = (action: ActionButton, index: number) => {
-    // Đối với button delete có confirm, không set onClick trực tiếp
     const shouldUseDirectClick = !(
       action.type === 'delete' && action.confirmTitle
     );
@@ -290,7 +284,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         danger={action.danger || action.type === 'delete'}
         size={size}
         icon={action.icon || getDefaultIcon(action.type)}
-        onClick={shouldUseDirectClick ? action.onClick : undefined} // ✅ Chỉ set onClick nếu không có confirm
+        onClick={shouldUseDirectClick ? action.onClick : undefined}
         disabled={action.disabled}
       />
     );
@@ -303,18 +297,17 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       <div key={index}>{button}</div>
     );
 
-    // Nếu là delete action và có confirmTitle, wrap với Popconfirm
     if (action.type === 'delete' && action.confirmTitle) {
       return (
         <Popconfirm
           key={index}
           title={action.confirmTitle}
           description="Hành động này không thể hoàn tác!"
-          onConfirm={action.onClick} // ✅ Chỉ gọi khi user confirm
+          onConfirm={action.onClick}
           okText={action.confirmOkText || 'Xóa'}
           cancelText={action.confirmCancelText || 'Hủy'}
-          okType="danger" // Thêm style cho button OK
-          placement="topRight" // Vị trí hiển thị popup
+          okType="danger"
+          placement="topRight"
         >
           {wrappedButton}
         </Popconfirm>

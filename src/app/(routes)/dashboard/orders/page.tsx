@@ -15,6 +15,7 @@ import {
   Timeline,
   Avatar,
   Card,
+  Image,
 } from 'antd';
 import {
   ShoppingOutlined,
@@ -144,16 +145,14 @@ const OrderManagement = () => {
   const [isDetailDrawerVisible, setIsDetailDrawerVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [activeTab, setActiveTab] = useState('details');
-  const [orders] = useState(mockOrders); // Thay thế bằng API hook
+  const [orders] = useState(mockOrders);
 
-  // Modal hooks
   const {
     isVisible: isStatusModalVisible,
     openModal: openStatusModal,
     closeModal: closeStatusModal,
   } = useModal();
 
-  // Transform orders data
   const transformedOrders = useMemo(() => {
     return orders.map((order) => ({
       id: order._id,
@@ -174,7 +173,6 @@ const OrderManagement = () => {
     }));
   }, [orders]);
 
-  // Statistics data
   const statisticsData: StatisticItem[] = useMemo(
     () => [
       {
@@ -208,7 +206,6 @@ const OrderManagement = () => {
     [transformedOrders],
   );
 
-  // Status mapping
   const getStatusConfig = (status: string) => {
     const configs = {
       PENDING: {
@@ -241,7 +238,6 @@ const OrderManagement = () => {
     return configs[paymentType] || configs.CASH;
   };
 
-  // Table columns
   const columns = [
     {
       title: 'Mã đơn hàng',
@@ -345,7 +341,6 @@ const OrderManagement = () => {
     },
   ];
 
-  // Event handlers
   const handleViewDetail = useCallback((order) => {
     setSelectedOrder(order);
     setIsDetailDrawerVisible(true);
@@ -363,7 +358,6 @@ const OrderManagement = () => {
   const handleSaveStatus = async () => {
     try {
       const values = await form.validateFields();
-      // API call to update order status
       console.log('Updating order status:', selectedOrder?.id, values);
       closeStatusModal();
     } catch (error) {
@@ -441,7 +435,6 @@ const OrderManagement = () => {
         }}
       />
 
-      {/* Status Update Modal */}
       <CustomModal
         title="Cập nhật trạng thái đơn hàng"
         open={isStatusModalVisible}
@@ -482,7 +475,6 @@ const OrderManagement = () => {
         </Form>
       </CustomModal>
 
-      {/* Order Detail Drawer */}
       <Drawer
         title={
           <div className="flex items-center gap-3">
@@ -517,7 +509,6 @@ const OrderManagement = () => {
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
           <TabPane tab="Chi tiết đơn hàng" key="details">
             <div className="space-y-6">
-              {/* Order Progress */}
               <Card>
                 <Steps
                   current={getOrderProgress(selectedOrder?.orderStatus)}
@@ -533,7 +524,6 @@ const OrderManagement = () => {
                 </Steps>
               </Card>
 
-              {/* Customer Info */}
               <Card title="Thông tin khách hàng">
                 <Descriptions column={2}>
                   <Descriptions.Item label="Tên khách hàng">
@@ -559,7 +549,7 @@ const OrderManagement = () => {
                       key={index}
                       className="flex items-center gap-4 p-4 border rounded-lg"
                     >
-                      <img
+                      <Image
                         src={
                           line.productItemId?.images?.[0] ||
                           'https://via.placeholder.com/60x60'
@@ -593,7 +583,6 @@ const OrderManagement = () => {
                 </div>
               </Card>
 
-              {/* Payment Summary */}
               <Card title="Thông tin thanh toán">
                 <Descriptions column={1}>
                   <Descriptions.Item label="Phương thức vận chuyển">

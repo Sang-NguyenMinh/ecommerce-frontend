@@ -46,63 +46,52 @@ import {
 import { useCategories } from '@/hooks/category';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Storage } from '@/libs/storage';
+import { useVariationOptionByCategoryId } from '@/hooks/variation-option';
+import {
+  useCreateProductItem,
+  useProductItems,
+  useUpdateProductItem,
+} from '@/hooks/product-item';
 
 const { Text } = Typography;
 const { Option } = Select;
 const { TabPane } = Tabs;
 
-const mockVariationOptions = {
-  var1: [
-    { _id: 'opt1', value: 'S', variationId: 'var1' },
-    { _id: 'opt2', value: 'M', variationId: 'var1' },
-  ],
-  var2: [
-    { _id: 'opt5', value: 'Đỏ', variationId: 'var2', color: '#ff0000' },
-    { _id: 'opt6', value: 'Xanh', variationId: 'var2', color: '#0000ff' },
-  ],
-};
-
-const mockProductItems = [
-  {
-    _id: 'item1',
-    productId: '1',
-    SKU: 'TSN-001-S-RED',
-    price: 299000,
-    qtyInStock: 25,
-    images: ['https://via.placeholder.com/300x300/ff0000'],
-    configurations: [
-      {
-        variationOptionId: 'opt1',
-        variationOption: { value: 'S', color: null },
-      },
-      {
-        variationOptionId: 'opt5',
-        variationOption: { value: 'Đỏ', color: '#ff0000' },
-      },
-    ],
-  },
-];
-
 const ProductManagement = () => {
   const [form] = Form.useForm();
   const [variantForm] = Form.useForm();
-  const [productItems, setProductItems] = useState(mockProductItems);
-  const [isDetailDrawerVisible, setIsDetailDrawerVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const { data: productItems } = useProductItems({
+    productId: selectedProduct?.id,
+  });
+
+  const [isDetailDrawerVisible, setIsDetailDrawerVisible] = useState(false);
   const [editorContent, setEditorContent] = useState('');
   const [activeTab, setActiveTab] = useState('basic');
   const [fileList, setFileList] = useState([]);
 
   console.log(Storage.Cookie.get('token'));
 
-  // API hooks
   const { data: productRes, isLoading } = useProducts();
   const { data: categoriesRes } = useCategories();
   const { mutate: deleteProduct, isLoading: isDeleting } = useDeleteProduct();
   const { mutate: createProduct, isLoading: isCreating } = useCreateProduct();
   const { mutate: updateProduct, isLoading: isUpdating } = useUpdateProduct();
 
-  // Modal hooks
+  const {
+    mutate: createProductVariation,
+    isLoading: isCreatingProductVariation,
+  } = useCreateProductItem();
+  const {
+    mutate: updateProductVariation,
+    isLoading: isUpdatingProductVariation,
+  } = useUpdateProductItem();
+
+  const { data: variationsRes } = useVariationOptionByCategoryId(
+    selectedProduct?.categoryId._id || null,
+  );
+
   const {
     isVisible: isModalVisible,
     isEditing,
@@ -112,16 +101,17 @@ const ProductManagement = () => {
 
   const {
     isVisible: isVariantModalVisible,
+    isEditing: isVariantEditing,
     openModal: openVariantModal,
     closeModal: closeVariantModal,
   } = useModal();
 
   const transformedProducts = useMemo(() => {
-    if (!productRes?.products || !Array.isArray(productRes.products)) {
+    if (!productRes?.data || !Array.isArray(productRes.data)) {
       return [];
     }
 
-    return productRes.products.map((product) => ({
+    return productRes.data.map((product) => ({
       id: product._id || '',
       productName: product.productName || 'Không có tên',
       categoryName: product.categoryId?.categoryName || 'Chưa phân loại',
@@ -142,7 +132,6 @@ const ProductManagement = () => {
     }));
   }, [productRes]);
 
-  // Statistics data based on API data
   const statisticsData: StatisticItem[] = useMemo(
     () => [
       {
@@ -159,13 +148,16 @@ const ProductManagement = () => {
       },
       {
         title: 'Tổng biến thể',
-        value: productItems.length,
+        value: productItems?.total,
         prefix: <BgColorsOutlined />,
         valueStyle: { color: '#722ed1' },
       },
       {
         title: 'Tổng tồn kho',
-        value: productItems.reduce((sum, item) => sum + item.qtyInStock, 0),
+        value: productItems?.data?.reduce(
+          (sum, item) => sum + item.qtyInStock,
+          0,
+        ),
         prefix: <BarChartOutlined />,
         valueStyle: { color: '#fa8c16' },
       },
@@ -173,7 +165,6 @@ const ProductManagement = () => {
     [transformedProducts, productItems],
   );
 
-  // Table columns
   const columns = [
     {
       title: 'Hình ảnh',
@@ -237,7 +228,9 @@ const ProductManagement = () => {
             backgroundColor:
               stock > 50 ? '#52c41a' : stock > 10 ? '#faad14' : '#ff4d4f',
           }}
-        />
+        >
+          <AppstoreOutlined className="text-lg" />
+        </Badge>
       ),
     },
     {
@@ -265,7 +258,7 @@ const ProductManagement = () => {
           {
             type: 'edit',
             tooltip: 'Chỉnh sửa',
-            onClick: () => handleEdit(record),
+            onClick: () => handleEditProduct(record),
           },
           {
             type: 'delete',
@@ -281,13 +274,12 @@ const ProductManagement = () => {
     },
   ];
 
-  // Event handlers
   const handleViewDetail = useCallback((product) => {
     setSelectedProduct(product);
     setIsDetailDrawerVisible(true);
   }, []);
 
-  const handleEdit = useCallback(
+  const handleEditProduct = useCallback(
     (product) => {
       setSelectedProduct(product);
       openModal(product, true);
@@ -305,7 +297,7 @@ const ProductManagement = () => {
     [form, openModal],
   );
 
-  const handleAddNew = useCallback(() => {
+  const handleAddNewProduct = useCallback(() => {
     openModal();
     form.resetFields();
     setFileList([]);
@@ -321,32 +313,23 @@ const ProductManagement = () => {
       formData.append('categoryId', values.categoryId || '');
       formData.append('content', editorContent || '');
 
-      // Phân loại files
-      const newFiles = [];
-      const existingUrls = [];
+      const newFiles: any = [];
+      const existingUrls: any = [];
 
-      fileList.forEach((file) => {
+      fileList.forEach((file: any) => {
         if (file?.originFileObj) {
-          // File mới được upload
           newFiles.push(file.originFileObj);
         } else if (file.url && !file.originFileObj) {
-          // File đã tồn tại
           existingUrls.push(file.url);
         }
       });
 
-      // Append files mới
-      newFiles.forEach((file) => {
+      newFiles.forEach((file: any) => {
         formData.append('thumbnails', file);
       });
 
-      // QUAN TRỌNG: Gửi existingThumbnails dưới dạng JSON string
       if (existingUrls.length > 0) {
         formData.append('existingThumbnails', JSON.stringify(existingUrls));
-      }
-
-      for (const pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
       }
 
       if (isEditing) {
@@ -370,58 +353,102 @@ const ProductManagement = () => {
   const handleAddVariant = useCallback(() => {
     openVariantModal();
     variantForm.resetFields();
+    setFileList([]);
   }, [openVariantModal, variantForm]);
 
   const handleEditVariant = useCallback(
     (variant) => {
       openVariantModal(variant, true);
       variantForm.setFieldsValue(variant);
+      setFileList(
+        variant.images?.map((url, index) => ({
+          uid: `${index}`,
+          name: `image-${index}`,
+          status: 'done',
+          url,
+        })) || [],
+      );
     },
     [openVariantModal, variantForm],
   );
 
   const handleDeleteVariant = useCallback(
     (variantId) => {
-      setProductItems(productItems.filter((item) => item._id !== variantId));
+      setProductItems(
+        productItems?.data?.filter((item) => item._id !== variantId),
+      );
     },
     [productItems],
   );
 
-  const handleSaveVariant = useCallback(async () => {
+  const handleSaveProductVariant = useCallback(async () => {
     try {
       const values = await variantForm.validateFields();
-      const newVariant = {
-        _id: Date.now().toString(),
-        productId: selectedProduct.id,
-        SKU: values.SKU,
-        price: values.price,
-        qtyInStock: values.qtyInStock,
-        images:
-          values.images?.map((file) => file.url || file.response?.url) || [],
-        configurations: values.configurations || [],
-      };
 
-      setProductItems([...productItems, newVariant]);
+      const formData = new FormData();
+      formData.append('productId', selectedProduct?.id || '');
+      formData.append('SKU', values.SKU || '');
+      formData.append('price', values.price || '');
+      formData.append('qtyInStock', values.qtyInStock || '');
+
+      const optionIds =
+        values.configurations
+          ?.map((config) => config.optionId)
+          .filter(Boolean) || [];
+      if (optionIds.length > 0) {
+        formData.append('configurations', JSON.stringify(optionIds));
+      }
+
+      const images = values.images || [];
+
+      const newFiles: any = [];
+      const existingUrls: any = [];
+
+      images.forEach((file) => {
+        if (file?.originFileObj) {
+          newFiles.push(file.originFileObj);
+        } else if (file.url && !file.originFileObj) {
+          existingUrls.push(file.url);
+        }
+      });
+
+      newFiles.forEach((file) => {
+        formData.append('images', file);
+      });
+
+      if (existingUrls.length > 0) {
+        formData.append('existingImages', JSON.stringify(existingUrls));
+      }
+
+      if (isVariantEditing) {
+        await updateProductVariation({
+          id: selectedProduct?._id ?? '',
+          data: formData,
+        });
+      } else {
+        await createProductVariation(formData);
+      }
+
       closeVariantModal();
       variantForm.resetFields();
     } catch (error) {
-      console.error('Error saving variant:', error);
+      console.error('Error saving product variant:', error);
     }
-  }, [variantForm, selectedProduct, productItems, closeVariantModal]);
+  }, [variantForm, selectedProduct, , isVariantEditing, closeVariantModal]);
 
-  const currentProductItems = productItems.filter(
+  const currentProductItems = productItems?.data?.filter(
     (item) => item.productId === selectedProduct?.id,
   );
 
   const statisticsForDetail: StatisticItem[] = [
     {
       title: 'Tổng biến thể',
-      value: currentProductItems.length,
+      value: productItems?.total,
       prefix: <AppstoreOutlined />,
     },
     {
       title: 'Tổng tồn kho',
-      value: currentProductItems.reduce(
+      value: currentProductItems?.reduce(
         (sum, item) => sum + item.qtyInStock,
         0,
       ),
@@ -429,10 +456,10 @@ const ProductManagement = () => {
     },
     {
       title: 'Giá trung bình',
-      value: currentProductItems.length
+      value: currentProductItems?.length
         ? Math.round(
             currentProductItems.reduce((sum, item) => sum + item.price, 0) /
-              currentProductItems.length,
+              currentProductItems?.length,
           )
         : 0,
       suffix: 'đ',
@@ -440,8 +467,7 @@ const ProductManagement = () => {
     },
   ];
 
-  // Variant table columns
-  const variantColumns = [
+  const productVariantColumns = [
     {
       title: 'Hình ảnh',
       dataIndex: 'images',
@@ -452,6 +478,7 @@ const ProductManagement = () => {
           width={50}
           height={50}
           src={images?.[0] || 'https://via.placeholder.com/50x50'}
+          alt="Product Image"
           className="rounded object-cover"
         />
       ),
@@ -473,20 +500,29 @@ const ProductManagement = () => {
           {configs?.map((config, index) => (
             <Tag
               key={index}
-              color={config.variationOption.color ? 'default' : 'blue'}
+              color={
+                config.variationOptionId.variationId.name === 'Màu sắc'
+                  ? 'default'
+                  : 'blue'
+              }
               style={
-                config.variationOption.color
+                config.variationOptionId.variationId.name === 'Màu sắc' &&
+                config.variationOptionId.value
                   ? {
-                      backgroundColor: config.variationOption.color,
+                      backgroundColor:
+                        config.variationOptionId.value === 'red'
+                          ? '#ff4d4f'
+                          : config.variationOptionId.value,
                       color:
-                        config.variationOption.color === '#ffffff'
+                        config.variationOptionId.value === 'white' ||
+                        config.variationOptionId.value === '#ffffff'
                           ? '#000'
                           : '#fff',
                     }
                   : {}
               }
             >
-              {config.variationOption.value}
+              {config.variationOptionId.name}
             </Tag>
           ))}
         </Space>
@@ -543,7 +579,7 @@ const ProductManagement = () => {
         actionButton={{
           text: 'Thêm sản phẩm mới',
           icon: <PlusOutlined />,
-          onClick: handleAddNew,
+          onClick: handleAddNewProduct,
         }}
       />
 
@@ -619,7 +655,6 @@ const ProductManagement = () => {
         </Form>
       </CustomModal>
 
-      {/* Product Detail Drawer */}
       <Drawer
         title={
           <div className="flex items-center gap-3">
@@ -688,6 +723,7 @@ const ProductManagement = () => {
                       width={100}
                       height={100}
                       src={img}
+                      alt="Product Thumbnail"
                       className="rounded-lg object-cover"
                     />
                   ))}
@@ -696,13 +732,10 @@ const ProductManagement = () => {
             </div>
           </TabPane>
 
-          <TabPane
-            tab={`Biến thể (${currentProductItems.length})`}
-            key="variants"
-          >
+          <TabPane tab={`Biến thể (${productItems?.total})`} key="variants">
             <CustomTable
-              columns={variantColumns}
-              dataSource={currentProductItems}
+              columns={productVariantColumns}
+              dataSource={productItems?.data}
               rowKey="_id"
               showCard={false}
               paginationConfig={{ pageSize: 5 }}
@@ -716,13 +749,17 @@ const ProductManagement = () => {
         </Tabs>
       </Drawer>
 
-      {/* Variant Form Modal */}
       <CustomModal
-        title="Thêm biến thể mới"
+        title={
+          isVariantEditing
+            ? 'Chỉnh sửa biến thể sản phẩm'
+            : 'Thêm biến thể sản phẩm mới'
+        }
         open={isVariantModalVisible}
         onCancel={closeVariantModal}
-        onSave={handleSaveVariant}
+        onSave={handleSaveProductVariant}
         width={600}
+        saveText={isVariantEditing ? 'Cập nhật' : 'Tạo biến thể sản phẩm'}
       >
         <Form form={variantForm} layout="vertical">
           <Form.Item
@@ -746,7 +783,7 @@ const ProductManagement = () => {
                   formatter={(value) =>
                     `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
                   }
-                  parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                  parser={(value) => value?.replace(/\$\s?|(,*)/g, '') ?? ''}
                 />
               </Form.Item>
             </Col>
@@ -765,50 +802,34 @@ const ProductManagement = () => {
             </Col>
           </Row>
 
-          <Form.Item label="Cấu hình biến thể">
-            <div className="space-y-3">
-              <div>
-                <Text strong>Size:</Text>
-                <Select
-                  style={{ width: '100%', marginTop: 4 }}
-                  placeholder="Chọn size"
-                >
-                  {mockVariationOptions.var1.map((opt) => (
-                    <Option key={opt._id} value={opt._id}>
-                      {opt.value}
-                    </Option>
-                  ))}
-                </Select>
-              </div>
+          {variationsRes?.map((item: any, index) => (
+            <Form.Item
+              key={index}
+              name={['configurations', index, 'optionId']}
+              label={item.variation.name}
+              rules={[
+                {
+                  required: true,
+                  message: `Vui lòng chọn ${item.variation.name.toLowerCase()}`,
+                },
+              ]}
+            >
+              <Select
+                style={{ width: '100%' }}
+                placeholder={`Chọn ${item.variation.name.toLowerCase()}`}
+              >
+                {item.options.map((opt: any) => (
+                  <Option key={opt._id} value={opt._id}>
+                    {opt.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          ))}
 
-              <div>
-                <Text strong>Màu sắc:</Text>
-                <Select
-                  style={{ width: '100%', marginTop: 4 }}
-                  placeholder="Chọn màu sắc"
-                >
-                  {mockVariationOptions.var2.map((opt) => (
-                    <Option key={opt._id} value={opt._id}>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-4 h-4 rounded border"
-                          style={{ backgroundColor: opt.color }}
-                        />
-                        {opt.value}
-                      </div>
-                    </Option>
-                  ))}
-                </Select>
-              </div>
-            </div>
+          <Form.Item name="images">
+            <ImageUpload label="Hình ảnh biến thể" maxCount={3} />
           </Form.Item>
-
-          <ImageUpload
-            maxCount={3}
-            label="Hình ảnh biến thể"
-            uploadText="Tải ảnh"
-            listType="picture-card"
-          />
         </Form>
       </CustomModal>
     </div>

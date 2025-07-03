@@ -52,12 +52,6 @@ interface CartItem {
   selectedSize?: string;
 }
 
-interface UserAddress {
-  _id: string;
-  address: string;
-  isDefault: boolean;
-}
-
 const PaymentPage: React.FC = () => {
   const [form] = Form.useForm();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -68,7 +62,6 @@ const PaymentPage: React.FC = () => {
   const [isVoucherApplied, setIsVoucherApplied] = useState(false);
   const [discount, setDiscount] = useState(0);
 
-  // Mock data giống như trong hình
   useEffect(() => {
     setCartItems([
       {
@@ -142,7 +135,6 @@ const PaymentPage: React.FC = () => {
   const handleSubmitOrder = async (values: any) => {
     setLoading(true);
     try {
-      // Mock API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
       message.success('Đặt hàng thành công!');
     } catch (error) {
@@ -272,7 +264,6 @@ const PaymentPage: React.FC = () => {
               </Form>
             </Card>
 
-            {/* Hình thức thanh toán */}
             <Card title="Hình thức thanh toán">
               <Radio.Group
                 value={selectedPaymentType}
@@ -305,7 +296,6 @@ const PaymentPage: React.FC = () => {
             </Card>
           </Col>
 
-          {/* Giỏ hàng */}
           <Col lg={12} md={24}>
             <Card title="Giỏ hàng">
               <div className="mb-4">
@@ -373,7 +363,6 @@ const PaymentPage: React.FC = () => {
                 ))}
               </div>
 
-              {/* Voucher Section */}
               <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-3">
                   <GiftOutlined className="!text-xl" />
@@ -394,7 +383,6 @@ const PaymentPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Tổng tiền */}
               <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                 <div className="space-y-2">
                   <div className="flex justify-between">

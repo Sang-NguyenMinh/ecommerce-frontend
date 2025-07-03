@@ -3,7 +3,6 @@ import { Layout, Menu, Badge, Drawer, Input, Button } from 'antd';
 import {
   ShoppingCartOutlined,
   UserOutlined,
-  HeartOutlined,
   SearchOutlined,
   MenuOutlined,
   DownOutlined,

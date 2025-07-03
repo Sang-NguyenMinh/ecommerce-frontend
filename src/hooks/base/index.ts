@@ -9,6 +9,7 @@ import { message } from 'antd';
 
 type CrudService = {
   getAll?: (params?: any) => Promise<any>;
+  getOne?: (id: string, params?: any) => Promise<any>;
   createOne?: (data: any) => Promise<any>;
   updateOne?: (id: string, data: any) => Promise<any>;
   deleteOne?: (id: string) => Promise<any>;

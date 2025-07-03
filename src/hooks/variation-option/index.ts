@@ -5,6 +5,7 @@ import {
   useFetchList,
   useUpdateItem,
 } from '../base';
+import { useQuery } from '@tanstack/react-query';
 
 const VARIATION_OPTION_KEY = ['variation_options'];
 
@@ -34,3 +35,13 @@ export const useDeleteVariationOption = () =>
     'Xóa tùy chọn biến thể thành công!',
     'Xóa tùy chọn biến thể thất bại!',
   );
+
+export const useVariationOptionByCategoryId = (categoryId: string) => {
+  return useQuery({
+    queryKey: ['variation-options-by-category-id'],
+    queryFn: async () => {
+      const res = await VariationOptionAPIs.getByCategoryId(categoryId);
+      return res?.data;
+    },
+  });
+};

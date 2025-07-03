@@ -25,4 +25,8 @@ export const VariationOptionAPIs = {
   deleteOne: (id: string) => {
     return axios.delete(`${VARIATION_OPTION_URL}/${id}`);
   },
+
+  getByCategoryId: (id: string) => {
+    return axios.get(`${VARIATION_OPTION_URL}/by_category/${id}`);
+  },
 };

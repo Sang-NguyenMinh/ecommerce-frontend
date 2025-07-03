@@ -1,4 +1,3 @@
-// components/Home/ServiceSection.tsx
 import React from 'react';
 import { Row, Col } from 'antd';
 import {

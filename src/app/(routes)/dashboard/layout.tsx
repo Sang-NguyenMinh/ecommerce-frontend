@@ -1,12 +1,11 @@
-"use client";
+'use client';
 
-import { Button, Layout, Tooltip } from "antd";
-import AppHeader from "components/DashboardHeader";
-import DashboardSideMenu from "components/DashboardSideMenu";
-import Sider from "antd/es/layout/Sider";
-import { Content } from "antd/es/layout/layout";
-import { SearchOutlined } from "@ant-design/icons";
-import "antd/dist/reset.css";
+import { Layout } from 'antd';
+import AppHeader from 'components/DashboardHeader';
+import DashboardSideMenu from 'components/DashboardSideMenu';
+import Sider from 'antd/es/layout/Sider';
+import { Content } from 'antd/es/layout/layout';
+import 'antd/dist/reset.css';
 export default function DashboardLayout({
   children,
 }: {
@@ -20,17 +19,17 @@ export default function DashboardLayout({
           width={200}
           theme="light"
           style={{
-            position: "fixed",
-            top: "64px",
+            position: 'fixed',
+            top: '64px',
             left: 0,
-            borderRight: "1px solid #f1f1f1",
-            height: "calc(100vh - 64px)",
+            borderRight: '1px solid #f1f1f1',
+            height: 'calc(100vh - 64px)',
           }}
         >
           <DashboardSideMenu />
         </Sider>
         <Layout style={{ marginLeft: 200 }}>
-          <Content style={{ padding: "16px", minHeight: "calc(100vh - 64px)" }}>
+          <Content style={{ padding: '16px', minHeight: 'calc(100vh - 64px)' }}>
             {children}
           </Content>
         </Layout>

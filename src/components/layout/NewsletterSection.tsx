@@ -1,4 +1,3 @@
-// components/Home/NewsletterSection.tsx
 import React from 'react';
 import { Button, Input, Form, Row, Col } from 'antd';
 import { MailOutlined, GiftOutlined } from '@ant-design/icons';
@@ -8,7 +7,6 @@ const NewsletterSection: React.FC = () => {
 
   const onFinish = (values: any) => {
     console.log('Newsletter signup:', values);
-    // Handle newsletter signup
     form.resetFields();
   };
 

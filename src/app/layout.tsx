@@ -11,7 +11,7 @@ import '@ant-design/v5-patch-for-react-19';
 import { StyleProvider } from '@ant-design/cssinjs';
 
 import { Montserrat } from 'next/font/google';
-import Header from '@/components/layout/Header';
+// import { Metadata } from 'next';
 
 const montserrat = Montserrat({
   subsets: ['latin'],

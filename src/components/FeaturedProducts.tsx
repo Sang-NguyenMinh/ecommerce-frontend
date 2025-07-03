@@ -1,10 +1,7 @@
-// components/Home/FeaturedProducts.tsx (Refactored)
-import React, { useState } from 'react';
-import { Button, Image, Typography } from 'antd';
+import React from 'react';
+import { Button } from 'antd';
 import Section from './ui/Section';
 import ProductItem from './ProductItem';
-
-const { Text } = Typography;
 
 interface Product {
   id: number;
@@ -19,8 +16,6 @@ interface Product {
 }
 
 const FeaturedProducts: React.FC = () => {
-  const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
-
   const products: Product[] = [
     {
       id: 1,
@@ -57,13 +52,6 @@ const FeaturedProducts: React.FC = () => {
       colors: ['#36454F', '#8B4513', '#000000'],
     },
   ];
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(price);
-  };
 
   return (
     <Section

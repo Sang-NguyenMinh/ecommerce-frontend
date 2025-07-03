@@ -59,7 +59,6 @@ export const uploadImageToCloudinary = async (
   }
 };
 
-// Utility function to validate image file
 export const validateImageFile = (
   file: File,
 ): { isValid: boolean; error?: string } => {
@@ -83,7 +82,6 @@ export const validateImageFile = (
   return { isValid: true };
 };
 
-// Generate optimized URL from Cloudinary public_id
 export const getOptimizedImageUrl = (
   publicId: string,
   options: {

@@ -51,7 +51,6 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 const { TabPane } = Tabs;
 
-// Mock data - trong thực tế sẽ lấy từ API
 const mockData = {
   overview: {
     totalRevenue: 125450000,
@@ -68,8 +67,6 @@ const mockData = {
     { month: 'T2', revenue: 9200000, orders: 178, users: 267 },
     { month: 'T3', revenue: 10100000, orders: 198, users: 298 },
     { month: 'T4', revenue: 11300000, orders: 234, users: 345 },
-    { month: 'T5', revenue: 12800000, orders: 267, users: 389 },
-    { month: 'T6', revenue: 15200000, orders: 298, users: 423 },
   ],
   orderStatus: [
     { name: 'Chờ xử lý', value: 45, color: '#faad14' },
@@ -276,7 +273,6 @@ const DashboardStatistics = () => {
 
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
         <TabPane tab="Tổng quan" key="overview">
-          {/* Overview Statistics */}
           <Row gutter={[16, 16]} className="mb-6">
             <Col xs={24} sm={12} lg={6}>
               <Card>
@@ -345,7 +341,6 @@ const DashboardStatistics = () => {
             </Col>
           </Row>
 
-          {/* Charts */}
           <Row gutter={[16, 16]} className="mb-6">
             <Col xs={24} lg={16}>
               <Card title="Biểu đồ doanh thu theo tháng" className="h-96">
@@ -396,7 +391,6 @@ const DashboardStatistics = () => {
             </Col>
           </Row>
 
-          {/* Additional Metrics */}
           <Row gutter={[16, 16]} className="mb-6">
             <Col xs={24} sm={8}>
               <Card>

@@ -1,4 +1,3 @@
-// components/Home/HeroSection.tsx
 import React from 'react';
 import { Button, Carousel } from 'antd';
 import { ArrowRightOutlined } from '@ant-design/icons';

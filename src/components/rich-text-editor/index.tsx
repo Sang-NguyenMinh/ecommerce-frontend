@@ -12,7 +12,6 @@ import Document from '@tiptap/extension-document';
 import { toast } from 'sonner';
 import { uploadImageToCloudinary, validateImageFile } from '@/utils/cloudinary';
 
-// Custom ResizableImage extension
 const ResizableImage = Image.extend({
   name: 'resizableImage',
 
@@ -58,7 +57,6 @@ const ResizableImage = Image.extend({
 
       const img = document.createElement('img');
 
-      // Set all attributes including src, alt, etc.
       Object.entries(HTMLAttributes).forEach(([key, value]) => {
         if (key !== 'style') {
           img.setAttribute(key, value as string);
@@ -68,7 +66,6 @@ const ResizableImage = Image.extend({
       img.className = 'block rounded-md my-2 cursor-pointer';
       img.draggable = false;
 
-      // Apply width/height from node attributes
       if (node.attrs.width) {
         const width =
           typeof node.attrs.width === 'number'
@@ -89,12 +86,10 @@ const ResizableImage = Image.extend({
         img.style.height = 'auto';
       }
 
-      // Create resize handles container
       const resizeHandles = document.createElement('div');
       resizeHandles.className =
         'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200';
 
-      // Create individual resize handles
       const handlePositions = [
         {
           position: 'top-left',
@@ -146,14 +141,12 @@ const ResizableImage = Image.extend({
         resizeHandles.appendChild(handle);
       });
 
-      // Add delete button
       const deleteBtn = document.createElement('button');
       deleteBtn.className =
         'absolute -top-2 -right-8 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-sm font-bold';
       deleteBtn.innerHTML = '×';
       deleteBtn.title = 'Delete image';
 
-      // Handle deletion
       deleteBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -165,7 +158,6 @@ const ResizableImage = Image.extend({
         }
       });
 
-      // Resize functionality
       let isResizing = false;
       let startX = 0;
       let startY = 0;
@@ -205,7 +197,6 @@ const ResizableImage = Image.extend({
         let newWidth = startWidth;
         let newHeight = startHeight;
 
-        // Calculate new dimensions based on handle position
         switch (currentHandle) {
           case 'right':
           case 'bottom-right':
@@ -232,11 +223,7 @@ const ResizableImage = Image.extend({
             break;
         }
 
-        // Maintain aspect ratio for corner handles or when Shift is pressed
         if (currentHandle.includes('-') || e.shiftKey) {
-          const ratioWidth = newWidth;
-          const ratioHeight = newHeight;
-
           if (Math.abs(deltaX) > Math.abs(deltaY)) {
             newHeight = newWidth / aspectRatio;
           } else {
@@ -244,11 +231,9 @@ const ResizableImage = Image.extend({
           }
         }
 
-        // Apply constraints
         newWidth = Math.max(50, Math.min(800, newWidth));
         newHeight = Math.max(50, Math.min(600, newHeight));
 
-        // Apply new dimensions
         img.style.width = `${newWidth}px`;
         img.style.height = `${newHeight}px`;
       };
@@ -261,7 +246,6 @@ const ResizableImage = Image.extend({
         document.removeEventListener('mousemove', handleResize);
         document.removeEventListener('mouseup', stopResize);
 
-        // Update node attributes
         if (typeof getPos === 'function') {
           const pos = getPos();
           const newAttrs = {
@@ -275,13 +259,10 @@ const ResizableImage = Image.extend({
         }
       };
 
-      // Add event listeners
       resizeHandles.addEventListener('mousedown', startResize);
 
-      // Prevent dragging
       img.addEventListener('dragstart', (e) => e.preventDefault());
 
-      // Assemble the component
       container.appendChild(img);
       container.appendChild(resizeHandles);
       container.appendChild(deleteBtn);
@@ -292,7 +273,6 @@ const ResizableImage = Image.extend({
         update: (updatedNode) => {
           if (updatedNode.type !== node.type) return false;
 
-          // Update image attributes
           if (updatedNode.attrs.src !== node.attrs.src) {
             img.src = updatedNode.attrs.src;
           }
@@ -303,7 +283,6 @@ const ResizableImage = Image.extend({
             img.title = updatedNode.attrs.title || '';
           }
 
-          // Update dimensions
           if (updatedNode.attrs.width) {
             const width =
               typeof updatedNode.attrs.width === 'number'

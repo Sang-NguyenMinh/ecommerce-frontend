@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   Form,
   Input,
@@ -9,8 +9,8 @@ import {
   Tag,
   Switch,
   Image,
-  Divider,
-  Checkbox,
+  Button,
+  Space,
 } from 'antd';
 import {
   PlusOutlined,
@@ -18,7 +18,7 @@ import {
   NodeIndexOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
-  InfoCircleOutlined,
+  TagsOutlined,
 } from '@ant-design/icons';
 
 import {
@@ -38,16 +38,11 @@ import {
   StatisticsCards,
   useModal,
 } from '../products/component/custom';
+import { useVariations } from '@/hooks/variation';
+import { useGetCategoryVariationsByCategoryId } from '@/hooks/category-variation';
 
 const { Text } = Typography;
 const { Option } = Select;
-
-// 2. Thêm interface
-interface VariationConfigData {
-  variationId: string;
-  variationName: string;
-  isRequired: boolean;
-}
 
 interface CategoryData {
   id: string;
@@ -74,16 +69,24 @@ const CategoryManagement = () => {
   const { mutate: createCategory, isPending: isCreating } = useCreateCategory();
   const { mutate: updateCategory, isPending: isUpdating } = useUpdateCategory();
 
-  console.log('categoriesRes', categoriesRes);
+  const { data: variationRes, isLoading: isVariationLoading } = useVariations();
 
-  const [selectedVariations, setSelectedVariations] = useState<
-    VariationConfigData[]
-  >([]);
-  const [availableVariations, setAvailableVariations] = useState([
-    { id: '1', name: 'Màu sắc', description: 'Các tùy chọn màu sắc' },
-    { id: '2', name: 'Kích thước', description: 'Các tùy chọn kích thước' },
-    { id: '3', name: 'Chất liệu', description: 'Loại chất liệu sản phẩm' },
-  ]);
+  const { data: categoryVariationRes, isLoading: isCategoryVariationLoading } =
+    useGetCategoryVariationsByCategoryId(selectedCategory?._id ?? '', {
+      populate: 'variationId',
+    });
+
+  const [selectedVariations, setSelectedVariations] = useState<[]>([]);
+
+  useEffect(() => {
+    if (selectedCategory && categoryVariationRes) {
+      const variationIds = categoryVariationRes?.data.map(
+        (item: any) => item.variationId._id,
+      );
+
+      setSelectedVariations(variationIds);
+    }
+  }, [selectedCategory, categoryVariationRes]);
 
   const {
     isVisible: isModalVisible,
@@ -98,19 +101,18 @@ const CategoryManagement = () => {
     }
 
     return categoriesRes.data.map((category: any) => ({
-      id: category._id || '',
+      _id: category._id || '',
       thumbnail: category.thumbnail || '',
       categoryName: category.categoryName || 'Không có tên',
       parentCategory: category.parentCategory,
       parentName: category.parentCategory?.categoryName || 'Danh mục gốc',
       parentId: category.parentCategory?._id || null,
-      status: category.status === true,
+      status: category.status,
       createdAt: category.createdAt || new Date().toISOString(),
       originalData: category,
     }));
   }, [categoriesRes]);
 
-  // Statistics data
   const statisticsData: StatisticItem[] = useMemo(() => {
     const activeCategories = transformedCategories.filter((cat) => cat.status);
     const rootCategories = transformedCategories.filter((cat) => !cat.parentId);
@@ -144,7 +146,6 @@ const CategoryManagement = () => {
     ];
   }, [transformedCategories]);
 
-  // Table columns
   const columns = [
     {
       title: 'Hình ảnh',
@@ -171,7 +172,7 @@ const CategoryManagement = () => {
           <Text strong>{text}</Text>
           <div>
             <Text type="secondary" className="text-xs">
-              ID: {record.id}
+              ID: {record._id}
             </Text>
           </div>
         </div>
@@ -223,9 +224,8 @@ const CategoryManagement = () => {
       key: 'action',
       width: 150,
       render: (_: any, record: CategoryData) => {
-        // Check if this category has children
         const hasChildren = transformedCategories.some(
-          (cat) => cat.parentId === record.id,
+          (cat) => cat.parentId === record._id,
         );
 
         const actions: ActionButton[] = [
@@ -241,7 +241,7 @@ const CategoryManagement = () => {
             confirmDescription: hasChildren
               ? 'Danh mục này có danh mục con. Xóa sẽ ảnh hưởng đến các danh mục con.'
               : undefined,
-            onClick: () => deleteCategory(record.id),
+            onClick: () => deleteCategory(record._id),
           },
         ];
         return <ActionButtons actions={actions} />;
@@ -259,18 +259,17 @@ const CategoryManagement = () => {
         status: category.status,
       });
 
-      // Load existing variations for this category
-      // Replace with actual API call
-      const existingVariations = [
-        { variationId: '1', variationName: 'Màu sắc', isRequired: true },
-        { variationId: '2', variationName: 'Kích thước', isRequired: false },
-      ];
-      setSelectedVariations(existingVariations);
+      setSelectedVariations(
+        categoryVariationRes?.data?.map((item: any) => item.variationId._id) ??
+          [],
+      );
+
+      console.log(selectedVariations);
 
       setFileList([
         {
-          uid: `${category.id}-thumbnail`,
-          name: `image-${category.id}.jpg`,
+          uid: `${category._id}-thumbnail`,
+          name: `image-${category._id}.jpg`,
           status: 'done',
           url: category.thumbnail,
         },
@@ -292,18 +291,18 @@ const CategoryManagement = () => {
 
       const formData = new FormData();
       formData.append('categoryName', values.categoryName || '');
-      formData.append('status', values.status || true);
+      formData.append('status', values.status);
       if (values.parentCategory)
         formData.append('parentCategory', values.parentCategory);
 
-      // Thêm variations vào formData
-      formData.append('variations', JSON.stringify(selectedVariations));
+      if (selectedVariations.length > 0) {
+        formData.append('variations', JSON.stringify(selectedVariations));
+      }
 
-      // Phân loại files
-      const newFiles = [];
-      const existingUrls = [];
+      const newFiles: any = [];
+      const existingUrls: any = [];
 
-      fileList.forEach((file) => {
+      fileList.forEach((file: any) => {
         if (file?.originFileObj) {
           newFiles.push(file.originFileObj);
         } else if (file.url && !file.originFileObj) {
@@ -311,7 +310,7 @@ const CategoryManagement = () => {
         }
       });
 
-      newFiles.forEach((file) => {
+      newFiles.forEach((file: any) => {
         formData.append('thumbnail', file);
       });
 
@@ -321,7 +320,7 @@ const CategoryManagement = () => {
 
       if (isEditing) {
         await updateCategory({
-          id: selectedCategory.id,
+          id: selectedCategory?._id,
           data: formData,
         });
       } else {
@@ -338,43 +337,20 @@ const CategoryManagement = () => {
     }
   };
 
-  const handleVariationChange = (variationId: string, checked: boolean) => {
-    if (checked) {
-      const variation = availableVariations.find((v) => v.id === variationId);
-      if (variation) {
-        setSelectedVariations((prev) => [
-          ...prev,
-          {
-            variationId: variation.id,
-            variationName: variation.name,
-            isRequired: false,
-          },
-        ]);
-      }
-    } else {
-      setSelectedVariations((prev) =>
-        prev.filter((v) => v.variationId !== variationId),
-      );
-    }
+  const handleCloseModal = () => {
+    closeModal();
+    form.resetFields();
+    setSelectedCategory(null);
+    setSelectedVariations([]);
   };
 
-  const handleRequiredChange = (variationId: string, isRequired: boolean) => {
-    setSelectedVariations((prev) =>
-      prev.map((v) =>
-        v.variationId === variationId ? { ...v, isRequired } : v,
-      ),
-    );
-  };
-
-  // Available parent categories (exclude self when editing)
   const availableParentCategories = useMemo(() => {
     if (!isEditing || !selectedCategory) {
       return transformedCategories;
     }
 
-    // Exclude the current category to prevent circular reference
     return transformedCategories.filter(
-      (cat) => cat.id !== selectedCategory.id,
+      (cat) => cat._id !== selectedCategory._id,
     );
   }, [transformedCategories, isEditing, selectedCategory]);
 
@@ -407,7 +383,7 @@ const CategoryManagement = () => {
       <CustomModal
         title={isEditing ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}
         open={isModalVisible}
-        onCancel={closeModal}
+        onCancel={handleCloseModal}
         onSave={handleSaveCategory}
         saveText={isEditing ? 'Cập nhật' : 'Tạo danh mục'}
         loading={isCreating || isUpdating}
@@ -437,11 +413,46 @@ const CategoryManagement = () => {
               allowClear
             >
               {availableParentCategories.map((cat) => (
-                <Option key={cat.id} value={cat.id}>
+                <Option key={cat._id} value={cat._id}>
                   {cat.categoryName}
                 </Option>
               ))}
             </Select>
+          </Form.Item>
+
+          <Form.Item label="Các biển thể sản phẩm">
+            <Select
+              mode="multiple"
+              allowClear
+              value={selectedVariations}
+              onChange={setSelectedVariations}
+              maxTagCount="responsive"
+              optionLabelProp="children"
+            >
+              {variationRes?.data.map((variation: any) => (
+                <Option key={variation._id} value={variation._id}>
+                  <Space>
+                    <TagsOutlined />
+                    {variation.name}
+                  </Space>
+                </Option>
+              ))}
+            </Select>
+            {selectedVariations.length > 0 && (
+              <div className="mt-2">
+                <Text type="secondary" className="text-sm">
+                  Đã chọn {selectedVariations.length} danh mục
+                </Text>
+                <Button
+                  type="link"
+                  size="small"
+                  onClick={() => setSelectedVariations([])}
+                  className="ml-2 p-0"
+                >
+                  Xóa tất cả
+                </Button>
+              </div>
+            )}
           </Form.Item>
 
           <Form.Item
@@ -464,76 +475,6 @@ const CategoryManagement = () => {
             label="Hình ảnh danh mục"
             required
           />
-
-          <div className="space-y-4">
-            <Divider>Cấu hình biến thể sản phẩm</Divider>
-
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <Text className="text-sm text-blue-700">
-                <InfoCircleOutlined className="mr-2" />
-                Chọn các biến thể sẽ áp dụng cho sản phẩm thuộc danh mục này.
-                Biến thể "Bắt buộc" sẽ yêu cầu nhập khi tạo sản phẩm.
-              </Text>
-            </div>
-
-            <div className="space-y-3">
-              <Text strong>Chọn biến thể:</Text>
-              {availableVariations.map((variation) => {
-                const isSelected = selectedVariations.some(
-                  (sv) => sv.variationId === variation.id,
-                );
-                const selectedVar = selectedVariations.find(
-                  (sv) => sv.variationId === variation.id,
-                );
-
-                return (
-                  <div key={variation.id} className="border p-3 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          checked={isSelected}
-                          onChange={(e) =>
-                            handleVariationChange(
-                              variation.id,
-                              e.target.checked,
-                            )
-                          }
-                        >
-                          <Text strong>{variation.name}</Text>
-                        </Checkbox>
-                        <Text type="secondary" className="text-sm">
-                          {variation.description}
-                        </Text>
-                      </div>
-
-                      {isSelected && (
-                        <div className="flex items-center space-x-2">
-                          <Text className="text-sm">Bắt buộc:</Text>
-                          <Switch
-                            size="small"
-                            checked={selectedVar?.isRequired || false}
-                            onChange={(checked) =>
-                              handleRequiredChange(variation.id, checked)
-                            }
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {selectedVariations.length > 0 && (
-              <div className="bg-green-50 p-3 rounded-lg">
-                <Text className="text-sm text-green-700">
-                  <CheckCircleOutlined className="mr-2" />
-                  Đã chọn {selectedVariations.length} biến thể:{' '}
-                  {selectedVariations.map((v) => v.variationName).join(', ')}
-                </Text>
-              </div>
-            )}
-          </div>
 
           {isEditing && selectedCategory && (
             <div className="bg-gray-50 p-4 rounded-lg">

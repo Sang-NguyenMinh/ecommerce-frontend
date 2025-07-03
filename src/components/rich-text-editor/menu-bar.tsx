@@ -37,20 +37,17 @@ export default function MenuBar({
     return null;
   }
 
-  // Check if an image is selected (both regular image and resizableImage)
   const isImageSelected =
     editor.isActive('image') || editor.isActive('resizableImage');
 
-  // Image control functions
   const resizeImage = (percentage: number) => {
     if (!isImageSelected) return;
 
     const { state } = editor;
     const { selection } = state;
 
-    // Find the image node
-    let imageNode = null;
-    let imagePos = null;
+    let imageNode: any = null;
+    let imagePos: any = null;
 
     state.doc.nodesBetween(selection.from, selection.to, (node, pos) => {
       if (node.type.name === 'image' || node.type.name === 'resizableImage') {
@@ -85,7 +82,6 @@ export default function MenuBar({
     const { state } = editor;
     const { selection } = state;
 
-    // Find the image node
     let imagePos = null;
 
     state.doc.nodesBetween(selection.from, selection.to, (node, pos) => {
@@ -181,7 +177,6 @@ export default function MenuBar({
 
   return (
     <div className="border rounded-md p-1 mb-1 bg-slate-50 space-y-1">
-      {/* Main toolbar */}
       <div className="flex items-center flex-wrap gap-1">
         {Options.map((option, index) => (
           <Toggle
@@ -195,7 +190,6 @@ export default function MenuBar({
           </Toggle>
         ))}
 
-        {/* Image Upload Button */}
         <Button
           variant="ghost"
           size="sm"

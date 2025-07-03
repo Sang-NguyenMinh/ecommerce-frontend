@@ -8,7 +8,9 @@ export interface IQueryProduct extends IBaseQuery {}
 
 export const ProductAPI = {
   getAll: (params: IQueryProduct = {}) => {
-    return axios.get(`${PRODUCT_URL}`, { params });
+    return axios.get(`${PRODUCT_URL}`, {
+      params: { populate: ['categoryId'], ...params },
+    });
   },
 
   createOne: (formData: FormData) => {

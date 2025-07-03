@@ -39,3 +39,23 @@ export const useDeleteCategoryVariation = () =>
     'Xóa biến thể cho danh mục thành công!',
     'Xóa biến thể cho danh mục thất bại!',
   );
+
+export const useGetCategoryVariationsByCategoryId = (
+  id: string,
+  params?: any,
+) => {
+  const shouldSkip = !id || id.trim() === '';
+  return useFetchList(
+    [CATEGORY_VARIATION_KEY, id],
+    CategoryVariationAPIs,
+    {
+      enabled: !shouldSkip,
+      staleTime: 0,
+      gcTime: 0,
+    },
+    {
+      categoryId: id,
+      ...params,
+    },
+  );
+};
