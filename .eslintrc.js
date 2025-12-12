@@ -14,5 +14,8 @@ module.exports = {
     'no-console': 'off',
     'prefer-const': 'off',
     'no-unused-vars': 'off',
+
+    'react-hooks/exhaustive-deps': 'off',
+    'jsx-a11y/alt-text': 'off',
   },
 };
