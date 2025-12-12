@@ -4,13 +4,32 @@ import { IBaseQuery } from '@/configs/types';
 
 const PRODUCT_URL = `${API_URL}/product`;
 
-export interface IQueryProduct extends IBaseQuery {}
+export interface IQueryProduct extends IBaseQuery {
+  categoryId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  inStock?: boolean;
+  productName?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  isActive?: boolean;
+}
 
 export const ProductAPI = {
   getAll: (params: IQueryProduct = {}) => {
     return axios.get(`${PRODUCT_URL}`, {
       params: { populate: ['categoryId'], ...params },
     });
+  },
+
+  getProductsByCategory: (categoryId: string, params: IQueryProduct = {}) => {
+    return axios.get(`${PRODUCT_URL}`, {
+      params: { categoryId, ...params },
+    });
+  },
+
+  getOne: (id: string) => {
+    return axios.get(`${PRODUCT_URL}/${id}`);
   },
 
   createOne: (formData: FormData) => {

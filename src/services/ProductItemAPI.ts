@@ -19,6 +19,10 @@ export const ProductItemAPI = {
     }
     return axios.post(`${PRODUCT_ITEM_URL}`, formData);
   },
+  getOne: (id: string) => {
+    return axios.get(`${PRODUCT_ITEM_URL}/${id}`);
+  },
+
   updateOne: (id: string, data: any) => {
     return axios.patch(`${PRODUCT_ITEM_URL}/${id}`, data);
   },

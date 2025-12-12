@@ -168,17 +168,17 @@ const DashboardStatistics = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('7days');
   const [activeTab, setActiveTab] = useState('overview');
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     const colors = {
       pending: 'orange',
       shipped: 'blue',
       delivered: 'green',
       cancelled: 'red',
     };
-    return colors[status] || 'default';
+    return colors[status as keyof typeof colors] || 'default';
   };
 
-  const getStatusText = (status) => {
+  const getStatusText = (status: string) => {
     const texts = {
       pending: 'Chờ xử lý',
       shipped: 'Đang giao',
@@ -215,19 +215,19 @@ const DashboardStatistics = () => {
       title: 'Đã bán',
       dataIndex: 'sold',
       key: 'sold',
-      render: (value) => <Text strong>{value}</Text>,
+      render: (value: number) => <Text strong>{value}</Text>,
     },
     {
       title: 'Doanh thu',
       dataIndex: 'revenue',
       key: 'revenue',
-      render: (value) => <Text strong>{formatCurrency(value)}</Text>,
+      render: (value: number) => <Text strong>{formatCurrency(value)}</Text>,
     },
     {
       title: 'Tồn kho',
       dataIndex: 'stock',
       key: 'stock',
-      render: (value) => (
+      render: (value: number) => (
         <Badge
           count={value}
           style={{

@@ -15,6 +15,10 @@ export const CategoryAPI = {
     return axios.post(`${CATEGORY_URL}`, data);
   },
 
+  getOne: (id: string) => {
+    return axios.get(`${CATEGORY_URL}/${id}`);
+  },
+
   updateOne: (id: string, data: FormData) => {
     return axios.patch(`${CATEGORY_URL}/${id}`, data);
   },

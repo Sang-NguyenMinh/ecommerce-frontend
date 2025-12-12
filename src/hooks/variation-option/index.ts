@@ -39,6 +39,7 @@ export const useDeleteVariationOption = () =>
 export const useVariationOptionByCategoryId = (categoryId: string) => {
   return useQuery({
     queryKey: ['variation-options-by-category-id'],
+    enabled: !!categoryId,
     queryFn: async () => {
       const res = await VariationOptionAPIs.getByCategoryId(categoryId);
       return res?.data;

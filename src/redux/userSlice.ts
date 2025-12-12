@@ -1,9 +1,9 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { extractResponseError } from "../libs/utils";
-import { AppDispatch, RootState } from "./store";
-import { IUser } from "configs/custom-types";
-import UserAPI from "services/UserAPI";
+import { extractResponseError } from '../libs/utils';
+import { AppDispatch, RootState } from './store';
+import { IUser } from 'configs/custom-types';
+import UserAPI from 'services/UserAPI';
 
 export interface IUserState extends IUser {
   isLoading: boolean | null;
@@ -11,25 +11,24 @@ export interface IUserState extends IUser {
 }
 
 const initialState: IUserState = {
-  _id: "",
-  username: "",
-  phone: "",
+  _id: '',
+  username: '',
+  phone: '',
   avatar: null,
-  role: "",
+  role: '',
   createdAt: null,
   isLoading: null,
   error: null,
 };
 
 const user = createSlice({
-  name: "user",
+  name: 'user',
   initialState,
   reducers: {
     getUserBegin(state: IUserState) {
       state.isLoading = true;
     },
     getUserSuccess(state: IUserState, action: PayloadAction<IUser>) {
-      console.log(action.payload);
       state.isLoading = false;
       state._id = action.payload._id;
       state.username = action.payload.username;
@@ -53,11 +52,11 @@ const user = createSlice({
       state.error = null;
     },
     clearData(state: IUserState) {
-      state._id = "";
-      state.username = "";
-      state.phone = "";
+      state._id = '';
+      state.username = '';
+      state.phone = '';
       state.avatar = null;
-      state.role = "";
+      state.role = '';
       state.createdAt = null;
       state.isLoading = false;
       state.error = null;
@@ -66,13 +65,12 @@ const user = createSlice({
 });
 
 const getUser =
-  (token?: string) =>
-  async (dispatch: AppDispatch, getState: () => RootState) => {
+  () => async (dispatch: AppDispatch, getState: () => RootState) => {
     try {
       const loading = getState().user.isLoading;
       if (loading) return;
       dispatch(getUserBegin());
-      const res = await UserAPI.getUser(token);
+      const res = await UserAPI.getUser();
 
       const user = res.data as IUser;
       dispatch(getUserSuccess(user));

@@ -25,12 +25,31 @@ export const useFetchList = (
     ...options,
     queryKey: [...key, params],
     queryFn: async () => {
-      const res = await api.getAll?.(params);
-      return res?.data;
+      const response = await api.getAll?.(params);
+      console.log('🔍 Type of response.data:', typeof response?.data);
+      return response?.data;
     },
   });
 };
 
+export const useFetchOne = (
+  key: QueryKey,
+  api: CrudService,
+  options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>,
+  id?: string,
+) => {
+  console.log('useFetchOne id', id);
+  return useQuery({
+    queryKey: key,
+    queryFn: async () => {
+      if (!id) throw new Error('ID is required');
+      const res = await api.getOne?.(id);
+      return res?.data;
+    },
+    enabled: !!id && options?.enabled !== false, // ✅ Kết hợp cả 2
+    ...options, // Spread các options khác
+  });
+};
 export const useCreateItem = (
   key: QueryKey,
   api: CrudService,

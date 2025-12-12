@@ -8,6 +8,7 @@ export interface IQueryVariation extends IBaseQuery {}
 
 export const VariationAPI = {
   getAll: (params: IQueryVariation = {}) => {
+    console.log('VariationAPI getAll params', params);
     return axios.get(`${VARIATION_URL}`, { params });
   },
 

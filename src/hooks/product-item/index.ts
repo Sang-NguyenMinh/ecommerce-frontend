@@ -1,41 +1,45 @@
-import { ProductItemAPI } from "services/ProductItemAPI";
+import { ProductItemAPI } from 'services/ProductItemAPI';
 import {
   useCreateItem,
   useDeleteItem,
   useFetchList,
+  useFetchOne,
   useUpdateItem,
-} from "../base";
+} from '../base';
 
-const PRODUCT_ITEM_KEY = ["product-items"];
+const PRODUCT_ITEM_KEY = ['product-items'];
 
 export const useProductItems = (params?: any) =>
   useFetchList(
-    ["product-items", params?.productId],
+    ['product-items', params?.productId],
     ProductItemAPI,
     undefined,
-    params
+    params,
   );
+
+export const useProductItem = (id: string) =>
+  useFetchOne(['product-item', id], ProductItemAPI, { enabled: !!id }, id);
 
 export const useCreateProductItem = () =>
   useCreateItem(
     PRODUCT_ITEM_KEY,
     ProductItemAPI,
-    "Tạo biến thể sản phẩm thành công!",
-    "Tạo biến thể sản phẩm thất bại!"
+    'Tạo biến thể sản phẩm thành công!',
+    'Tạo biến thể sản phẩm thất bại!',
   );
 
 export const useUpdateProductItem = () =>
   useUpdateItem(
     PRODUCT_ITEM_KEY,
     ProductItemAPI,
-    "Cập nhật biến thể sản phẩm thành công!",
-    "Cập nhật biến thể sản phẩm thất bại!"
+    'Cập nhật biến thể sản phẩm thành công!',
+    'Cập nhật biến thể sản phẩm thất bại!',
   );
 
 export const useDeleteProductItem = () =>
   useDeleteItem(
     PRODUCT_ITEM_KEY,
     ProductItemAPI,
-    "Xóa biến thể sản phẩm thành công!",
-    "Xóa biến thể sản phẩm thất bại!"
+    'Xóa biến thể sản phẩm thành công!',
+    'Xóa biến thể sản phẩm thất bại!',
   );

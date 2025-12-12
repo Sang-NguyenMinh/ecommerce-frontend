@@ -2,6 +2,8 @@
 
 import './globals.css';
 import 'antd/dist/reset.css';
+import 'swiper/css';
+import 'swiper/css/navigation';
 import { ThemeProvider } from 'next-themes';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { ConfigProvider } from 'antd';

@@ -60,7 +60,7 @@ const { TabPane } = Tabs;
 const ProductManagement = () => {
   const [form] = Form.useForm();
   const [variantForm] = Form.useForm();
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   const { data: productItems } = useProductItems({
     productId: selectedProduct?.id,
@@ -69,23 +69,23 @@ const ProductManagement = () => {
   const [isDetailDrawerVisible, setIsDetailDrawerVisible] = useState(false);
   const [editorContent, setEditorContent] = useState('');
   const [activeTab, setActiveTab] = useState('basic');
-  const [fileList, setFileList] = useState([]);
+  const [fileList, setFileList] = useState<any>([]);
 
   console.log(Storage.Cookie.get('token'));
 
   const { data: productRes, isLoading } = useProducts();
   const { data: categoriesRes } = useCategories();
-  const { mutate: deleteProduct, isLoading: isDeleting } = useDeleteProduct();
-  const { mutate: createProduct, isLoading: isCreating } = useCreateProduct();
-  const { mutate: updateProduct, isLoading: isUpdating } = useUpdateProduct();
+  const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
+  const { mutate: createProduct, isPending: isCreating } = useCreateProduct();
+  const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();
 
   const {
     mutate: createProductVariation,
-    isLoading: isCreatingProductVariation,
+    isPending: isCreatingProductVariation,
   } = useCreateProductItem();
   const {
     mutate: updateProductVariation,
-    isLoading: isUpdatingProductVariation,
+    isPending: isUpdatingProductVariation,
   } = useUpdateProductItem();
 
   const { data: variationsRes } = useVariationOptionByCategoryId(
@@ -116,6 +116,7 @@ const ProductManagement = () => {
       productName: product.productName || 'Không có tên',
       categoryName: product.categoryId?.categoryName || 'Chưa phân loại',
       categoryId: product.categoryId?._id || product.categoryId || null,
+      price: product.price,
       thumbnails:
         Array.isArray(product.thumbnails) && product.thumbnails.length > 0
           ? product.thumbnails
@@ -185,7 +186,7 @@ const ProductManagement = () => {
       title: 'Tên sản phẩm',
       dataIndex: 'productName',
       key: 'productName',
-      width: 200,
+      width: 160,
       render: (text, record) => (
         <div>
           <Text strong>{text}</Text>
@@ -202,6 +203,13 @@ const ProductManagement = () => {
       key: 'categoryName',
       width: 120,
       render: (text) => <Tag color="blue">{text}</Tag>,
+    },
+    {
+      title: 'Giá',
+      dataIndex: 'price',
+      key: 'price',
+      width: 120,
+      render: (price) => <Text strong>{price?.toLocaleString('vi-VN')}đ</Text>,
     },
     {
       title: 'Biến thể',
@@ -310,6 +318,9 @@ const ProductManagement = () => {
 
       const formData = new FormData();
       formData.append('productName', values.productName || '');
+      formData.append('price', values.price || '');
+
+      console.log('Selected price ID:', values.price);
       formData.append('categoryId', values.categoryId || '');
       formData.append('content', editorContent || '');
 
@@ -374,7 +385,8 @@ const ProductManagement = () => {
 
   const handleDeleteVariant = useCallback(
     (variantId) => {
-      setProductItems(
+      // setProductItems(
+      setSelectedProduct(
         productItems?.data?.filter((item) => item._id !== variantId),
       );
     },
@@ -609,7 +621,7 @@ const ProductManagement = () => {
       >
         <Form form={form} layout="vertical">
           <Row gutter={16}>
-            <Col span={12}>
+            <Col span={8}>
               <Form.Item
                 label="Tên sản phẩm"
                 name="productName"
@@ -620,7 +632,8 @@ const ProductManagement = () => {
                 <Input size="large" placeholder="Nhập tên sản phẩm" />
               </Form.Item>
             </Col>
-            <Col span={12}>
+
+            <Col span={8}>
               <Form.Item
                 label="Danh mục"
                 name="categoryId"
@@ -633,6 +646,24 @@ const ProductManagement = () => {
                     </Option>
                   ))}
                 </Select>
+              </Form.Item>
+            </Col>
+
+            <Col span={8}>
+              <Form.Item
+                label="Giá sản phẩm"
+                name="price"
+                rules={[
+                  { required: true, message: 'Vui lòng nhập giá sản phẩm' },
+                ]}
+              >
+                <Input
+                  size="large"
+                  type="number"
+                  min={0}
+                  placeholder="Nhập giá (VNĐ)"
+                  addonAfter="₫"
+                />
               </Form.Item>
             </Col>
           </Row>

@@ -86,7 +86,7 @@ const Footer: React.FC = () => {
   return (
     <AntFooter className="!bg-gradient-to-br !from-slate-900 !via-slate-800 !to-slate-900  !p-0 relative overflow-hidden">
       <div className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <Row gutter={[48, 48]}>
             <Col xs={24} lg={6}>
               <div className="space-y-6">
@@ -108,22 +108,6 @@ const Footer: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <HeartOutlined className="!text-blue-400 text-lg" />
                     <Text className="!text-blue-400">STAY UPDATE</Text>
-                  </div>
-                  <div className="flex flex-col space-y-3">
-                    <Input
-                      placeholder="Enter your email address"
-                      className="!bg-gray-300  !border-white/20 !text-gray-700 custom-placeholder !py-3 !px-4 !rounded-lg hover:!border-blue-400 focus:!border-blue-400"
-                      suffix={
-                        <Button
-                          type="text"
-                          icon={<SendOutlined />}
-                          className="!text-blue-400 hover:!text-blue-500"
-                        />
-                      }
-                    />
-                    <Text className="!text-gray-400 !text-xs">
-                      Get exclusive offers, new arrivals & style tips
-                    </Text>
                   </div>
                 </div>
 

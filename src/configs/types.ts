@@ -1,14 +1,14 @@
 export interface IBaseQuery {
   lastId?: string;
   filter?: string;
-  sortOrder?: string | number;
-  sortField?: string;
+  sort?: string | number; // "name:asc,createdAt:desc"
   limit?: string | number;
   page?: string | number;
   pageSize?: string | number;
   keyword?: string;
-  searchField?: string | string[];
+  search?: string;
   populate?: string | string[];
+  fields?: string | string[];
 }
 
 export interface ICreateCategory {

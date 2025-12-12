@@ -9,7 +9,7 @@ const HeroSection = () => {
       title: 'Bộ Sưu Tập Thu Đông 2024',
       subtitle: 'Phong cách lịch lãm cho quý ông hiện đại',
       image:
-        'https://res.cloudinary.com/dzcj0i6fy/image/upload/v1749742637/ChatGPT_Image_22_33_08_12_thg_6_2025_ll0fla.png',
+        'https://res.cloudinary.com/ddrrh2cxt/image/upload/v1764078989/download_uhorwl.jpg',
       ctaText: 'Khám phá ngay',
     },
     {
@@ -17,7 +17,7 @@ const HeroSection = () => {
       title: 'Ưu Đại Lên Đến 50%',
       subtitle: 'Các sản phẩm thời trang cao cấp',
       image:
-        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=600&fit=crop',
+        'https://res.cloudinary.com/ddrrh2cxt/image/upload/v1764082409/download_1_gnv3tm.jpg',
       ctaText: 'Mua sắm ngay',
     },
     {
@@ -25,7 +25,7 @@ const HeroSection = () => {
       title: 'Phong Cách Công Sở',
       subtitle: 'Tự tin trong mọi cuộc họp',
       image:
-        'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=1200&h=600&fit=crop',
+        'https://res.cloudinary.com/ddrrh2cxt/image/upload/v1764082462/download_2_tiursd.jpg',
       ctaText: 'Xem bộ sưu tập',
     },
   ];
@@ -38,7 +38,6 @@ const HeroSection = () => {
         touchMove={true}
         arrows={true}
         autoplay
-        dots={{ className: 'custom-dots' }}
       >
         {slides.map((slide) => (
           <div key={slide.id} className="relative">

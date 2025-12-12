@@ -86,9 +86,7 @@ const logIn = (): AppThunk => async (dispatch, getState) => {
       dispatch(auth.actions.authSuccess({ token }));
 
       dispatch(getUserBegin());
-      const response = await UserAPI.getUser(
-        [token.type, token.accessToken].join(' '),
-      );
+      const response = await UserAPI.getUser();
       dispatch(getUserSuccess(response.data));
     } catch (err) {
       console.log(extractResponseError(err));

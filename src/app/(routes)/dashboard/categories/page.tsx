@@ -459,12 +459,14 @@ const CategoryManagement = () => {
             label="Trạng thái"
             name="status"
             valuePropName="checked"
+            initialValue={true}
             tooltip="Danh mục không hoạt động sẽ không hiển thị trên trang web"
           >
             <Switch
               checkedChildren="Hoạt động"
               unCheckedChildren="Tạm dừng"
               defaultChecked
+              defaultValue={true}
             />
           </Form.Item>
 
