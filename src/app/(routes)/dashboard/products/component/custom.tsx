@@ -90,7 +90,7 @@ export const StatisticsCards: React.FC<StatisticsCardsProps> = ({
 import { Table, TableProps } from 'antd';
 
 interface CustomTableProps extends Omit<TableProps<any>, 'pagination'> {
-  title?: string;
+  headerTitle?: string;
   showCard?: boolean;
   paginationConfig?: {
     pageSize?: number;
@@ -101,7 +101,7 @@ interface CustomTableProps extends Omit<TableProps<any>, 'pagination'> {
 }
 
 export const CustomTable: React.FC<CustomTableProps> = ({
-  title,
+  headerTitle,
   showCard = true,
   paginationConfig = {},
   ...tableProps
@@ -123,7 +123,7 @@ export const CustomTable: React.FC<CustomTableProps> = ({
   const tableElement = <Table {...tableProps} pagination={defaultPagination} />;
 
   if (showCard) {
-    return <Card title={title}>{tableElement}</Card>;
+    return <Card title={headerTitle}>{tableElement}</Card>;
   }
 
   return tableElement;
@@ -242,6 +242,7 @@ export interface ActionButton {
   confirmTitle?: string;
   confirmOkText?: string;
   confirmCancelText?: string;
+  confirmDescription?: string;
 }
 
 interface ActionButtonsProps {
@@ -327,7 +328,7 @@ export function useModal() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  const openModal = useCallback((item = null, editing = false) => {
+  const openModal = useCallback((item: any, editing = false) => {
     setSelectedItem(item);
     setIsEditing(editing);
     setIsVisible(true);

@@ -53,14 +53,13 @@ interface CategoryData {
   } | null;
   status: boolean;
   createdAt?: string;
+  parentId?: string;
   thumbnail?: string;
 }
 
 const CategoryManagement = () => {
   const [form] = Form.useForm();
-  const [selectedCategory, setSelectedCategory] = useState<CategoryData | null>(
-    null,
-  );
+  const [selectedCategory, setSelectedCategory] = useState<any>(null);
 
   const [fileList, setFileList] = useState([]);
 
@@ -167,7 +166,7 @@ const CategoryManagement = () => {
       dataIndex: 'categoryName',
       key: 'categoryName',
       width: 250,
-      render: (text: string, record: CategoryData) => (
+      render: (text: string, record: any) => (
         <div>
           <Text strong>{text}</Text>
           <div>
@@ -183,7 +182,7 @@ const CategoryManagement = () => {
       dataIndex: 'parentName',
       key: 'parentName',
       width: 200,
-      render: (text: string, record: CategoryData) => (
+      render: (text: string, record: any) => (
         <Tag color={record.parentId ? 'blue' : 'green'}>{text}</Tag>
       ),
     },
@@ -191,7 +190,7 @@ const CategoryManagement = () => {
       title: 'Loại danh mục',
       key: 'categoryType',
       width: 120,
-      render: (_, record: CategoryData) => (
+      render: (_, record: any) => (
         <Tag color={record.parentId ? 'orange' : 'purple'}>
           {record.parentId ? 'Danh mục con' : 'Danh mục gốc'}
         </Tag>
@@ -223,7 +222,7 @@ const CategoryManagement = () => {
       title: 'Thao tác',
       key: 'action',
       width: 150,
-      render: (_: any, record: CategoryData) => {
+      render: (_: any, record: any) => {
         const hasChildren = transformedCategories.some(
           (cat) => cat.parentId === record._id,
         );
@@ -279,7 +278,7 @@ const CategoryManagement = () => {
   );
 
   const handleAddNew = useCallback(() => {
-    openModal();
+    openModal(null, false);
     form.resetFields();
     setSelectedCategory(null);
     setSelectedVariations([]);
