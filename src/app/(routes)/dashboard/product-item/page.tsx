@@ -39,7 +39,7 @@ interface DataType {
   images: string[];
   qtyInStock: string;
 }
-
+const Option = Select.Option;
 export default function Category() {
   const { data: productRes } = useProducts();
   const [selectedProduct, setSelectedProduct] = useState<DataType | null>(null);
