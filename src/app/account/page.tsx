@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import { Card, Button, Avatar, Divider, Badge, message } from 'antd';
 import {
