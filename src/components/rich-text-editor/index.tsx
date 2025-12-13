@@ -153,7 +153,10 @@ const ResizableImage = Image.extend({
 
         if (typeof getPos === 'function') {
           const pos = getPos();
-          const tr = editor.view.state.tr.delete(pos, pos + node.nodeSize);
+          const tr = editor.view.state.tr.delete(
+            pos ?? 0,
+            pos ?? 0 + node.nodeSize,
+          );
           editor.view.dispatch(tr);
         }
       });
@@ -254,7 +257,11 @@ const ResizableImage = Image.extend({
             height: img.style.height,
           };
 
-          const tr = editor.view.state.tr.setNodeMarkup(pos, null, newAttrs);
+          const tr = editor.view.state.tr.setNodeMarkup(
+            pos ?? 0,
+            null,
+            newAttrs,
+          );
           editor.view.dispatch(tr);
         }
       };
