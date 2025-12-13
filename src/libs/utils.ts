@@ -217,18 +217,6 @@ const isNumericC = (text: any) => {
   return isNaN(Number(text)) === false;
 };
 
-const commaNumberC = (value: number) => {
-  const valueText = String(value);
-
-  if (valueText.indexOf('e') > 0) return valueText;
-
-  try {
-    return commaNumber(value, '.', ',');
-  } catch (e) {
-    return value;
-  }
-};
-
 export const getPartialDate = (date: any) => {
   const check = moment(date, 'YYYY/MM/DD');
   const month = check.format('MM');

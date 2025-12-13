@@ -121,6 +121,7 @@ interface PromotionData {
   usedCount: number;
   isActive: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
 interface PromotionUsageData {
@@ -465,10 +466,7 @@ const PromotionManagement = () => {
             ID: {record.categoryId._id}
           </div>
           <div className="mt-1">
-            <Tag
-              color={record.includeSubCategories ? 'green' : 'orange'}
-              size="small"
-            >
+            <Tag color={record.includeSubCategories ? 'green' : 'orange'}>
               {record.includeSubCategories
                 ? 'Bao gồm danh mục con'
                 : 'Chỉ danh mục chính'}
@@ -592,9 +590,7 @@ const PromotionManagement = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Text strong>#{record.orderId}</Text>
-            <Tag color="blue" size="small">
-              Đã thanh toán
-            </Tag>
+            <Tag color="blue">Đã thanh toán</Tag>
           </div>
           <div className="text-sm text-gray-500">
             Khách hàng: {record.userName}
@@ -628,9 +624,7 @@ const PromotionManagement = () => {
             <div className="text-lg font-bold text-green-600 mb-1">
               -{record.discountAmount.toLocaleString()}đ
             </div>
-            <Tag color="green" size="small">
-              Tiết kiệm {savingPercent}%
-            </Tag>
+            <Tag color="green">Tiết kiệm {savingPercent}%</Tag>
           </div>
         );
       },
@@ -673,7 +667,7 @@ const PromotionManagement = () => {
   );
 
   const handleAddNew = useCallback(() => {
-    openModal();
+    openModal(null, false);
     form.resetFields();
     setSelectedPromotion(null);
     setSelectedCategories([]);
@@ -1114,7 +1108,7 @@ const PromotionManagement = () => {
                     style={{ width: '100%' }}
                     maxTagCount="responsive"
                     filterOption={(input, option) =>
-                      option?.children
+                      String(option?.children)
                         ?.toLowerCase()
                         .includes(input.toLowerCase())
                     }
@@ -1160,7 +1154,7 @@ const PromotionManagement = () => {
                     style={{ width: '100%' }}
                     maxTagCount="responsive"
                     filterOption={(input, option) =>
-                      option?.children
+                      String(option?.children)
                         ?.toLowerCase()
                         .includes(input.toLowerCase())
                     }
@@ -1264,7 +1258,7 @@ const PromotionManagement = () => {
         title="Chi tiết khuyến mãi"
         open={viewModalVisible}
         onCancel={() => setViewModalVisible(false)}
-        footer={[
+        customFooter={[
           <Button
             key="edit"
             type="primary"

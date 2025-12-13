@@ -82,7 +82,7 @@ export default function MenuBar({
     const { state } = editor;
     const { selection } = state;
 
-    let imagePos = null;
+    let imagePos: any;
 
     state.doc.nodesBetween(selection.from, selection.to, (node, pos) => {
       if (node.type.name === 'image' || node.type.name === 'resizableImage') {

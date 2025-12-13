@@ -74,6 +74,7 @@ interface VariationData {
   isActive: boolean;
   createdAt?: string;
   variationOptionCount: number;
+  categoriesCount: number;
 }
 
 const VariationManagement = () => {
@@ -293,7 +294,7 @@ const VariationManagement = () => {
   );
 
   const handleAddNewVariation = useCallback(() => {
-    openModal();
+    openModal(null, false);
     form.resetFields();
     setSelectedVariation(null);
   }, [form, openModal]);
