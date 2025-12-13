@@ -306,7 +306,7 @@ const ProductManagement = () => {
   );
 
   const handleAddNewProduct = useCallback(() => {
-    openModal();
+    openModal(null, false);
     form.resetFields();
     setFileList([]);
     setEditorContent('');
@@ -362,7 +362,7 @@ const ProductManagement = () => {
   };
 
   const handleAddVariant = useCallback(() => {
-    openVariantModal();
+    openVariantModal(null, false);
     variantForm.resetFields();
     setFileList([]);
   }, [openVariantModal, variantForm]);

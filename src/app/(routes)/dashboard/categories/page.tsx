@@ -45,7 +45,7 @@ const { Text } = Typography;
 const { Option } = Select;
 
 interface CategoryData {
-  id: string;
+  _id: string;
   categoryName: string;
   parentCategory: {
     _id: string;
@@ -57,11 +57,18 @@ interface CategoryData {
   thumbnail?: string;
 }
 
+export interface FileUpload {
+  uid: string;
+  name: string;
+  status: 'error' | 'success' | 'done' | 'uploading' | 'removed';
+  url?: string;
+}
+
 const CategoryManagement = () => {
   const [form] = Form.useForm();
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
 
-  const [fileList, setFileList] = useState([]);
+  const [fileList, setFileList] = useState<FileUpload[]>([]);
 
   const { data: categoriesRes, isLoading } = useCategories();
   const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();

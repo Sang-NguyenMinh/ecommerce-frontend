@@ -51,7 +51,7 @@ export default function Category() {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const { getColumnSearchProps } = useColumnSearch();
+  const { getColumnSearchProps } = useColumnSearch<DataType>();
   const [isEditing, setIsEditing] = useState(false);
   const { mutate: createProduct, isPending: isCreating } = useCreateProduct();
   const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();
