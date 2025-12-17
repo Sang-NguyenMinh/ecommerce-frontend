@@ -11,17 +11,21 @@ const NewsletterSection: React.FC = () => {
   };
 
   return (
-    <section className="py-16 px-4 lg:px-8 bg-gradient-to-r !from-gray-900 !to-black !text-white">
+    <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r !from-gray-900 !to-black !text-white">
       <div className="max-w-4xl mx-auto text-center">
-        <GiftOutlined className="text-5xl mb-6 !text-yellow-400" />
-        <h2 className="text-3xl lg:text-4xl font-bold mb-4">
+        <GiftOutlined className="text-4xl sm:text-5xl mb-4 sm:mb-6 !text-yellow-400" />
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 px-4">
           Đăng Ký Nhận Ưu Đãi Đặc Biệt
         </h2>
-        <p className="text-lg mb-8 opacity-90">
+        <p className="text-base sm:text-lg mb-6 sm:mb-8 opacity-90 px-4">
           Nhận thông tin về sản phẩm mới, sale độc quyền và các ưu đãi hấp dẫn
         </p>
 
-        <Form form={form} onFinish={onFinish} className="max-w-md !mx-auto">
+        <Form
+          form={form}
+          onFinish={onFinish}
+          className="max-w-md !mx-auto px-4"
+        >
           <Row gutter={[12, 12]}>
             <Col xs={24} sm={16}>
               <Form.Item
@@ -30,23 +34,24 @@ const NewsletterSection: React.FC = () => {
                   { required: true, message: 'Vui lòng nhập email!' },
                   { type: 'email', message: 'Email không hợp lệ!' },
                 ]}
+                className="!mb-0"
               >
                 <Input
                   size="large"
-                  placeholder="Nhập địa chỉ email của bạn"
+                  placeholder="Nhập email của bạn"
                   prefix={<MailOutlined />}
-                  className="!h-10"
+                  className="!h-12"
                 />
               </Form.Item>
             </Col>
             <Col xs={24} sm={8}>
-              <Form.Item>
+              <Form.Item className="!mb-0">
                 <Button
                   type="primary"
                   size="large"
                   htmlType="submit"
                   block
-                  className="h-12 !bg-yellow-500 hover:!bg-yellow-600 !border-yellow-500 text-black font-semibold"
+                  className="!h-12 !bg-yellow-500 hover:!bg-yellow-600 !border-yellow-500 !text-black font-semibold"
                 >
                   Đăng Ký
                 </Button>
@@ -55,7 +60,7 @@ const NewsletterSection: React.FC = () => {
           </Row>
         </Form>
 
-        <p className="text-sm mt-4 opacity-75">
+        <p className="text-xs sm:text-sm mt-4! sm:mt-6  opacity-75 px-4 leading-relaxed">
           * Bằng cách đăng ký, bạn đồng ý với Điều khoản sử dụng và Chính sách
           bảo mật của chúng tôi
         </p>

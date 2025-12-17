@@ -1,5 +1,5 @@
 'use client';
-import React, { use, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import HeroSection from '@/components/layout/HeroSection';
 import NewsletterSection from '@/components/layout/NewsletterSection';
@@ -8,30 +8,30 @@ import CategoryItem from '@/components/CategoryItem';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import ProductTestimonialSection from '@/components/layout/ProductTestimonialSection';
 import { Leaf, MapPin, Package } from 'lucide-react';
-import SectionLayout from '@/components/layout/SectionLayout';
-import { Button } from 'antd';
+import { Button, notification } from 'antd';
 import ProductItem from '@/components/ProductItem';
 import { useProducts } from '@/hooks/product';
 import { useRouter } from 'next/navigation';
+import SectionLayout from '@/components/layout/SectionLayout';
 
 const features = [
   {
     id: 1,
     icon: Package,
-    title: 'Complimentary Shipping',
-    description: 'Enjoy free shipping on U.S. orders over $100.',
+    title: 'Miễn Phí Vận Chuyển',
+    description: 'Miễn phí giao hàng cho đơn hàng trên 1000k.',
   },
   {
     id: 2,
     icon: Leaf,
-    title: 'Consciously Crafted',
-    description: 'Designed with you and the planet in mind.',
+    title: 'Sản Xuất Bền Vững',
+    description: 'Thiết kế thân thiện với bạn và môi trường.',
   },
   {
     id: 3,
     icon: MapPin,
-    title: 'Come Say Hi',
-    description: 'We have 11 stores across the U.S.',
+    title: 'Hệ Thống Cửa Hàng',
+    description: 'Chúng tôi có 11 cửa hàng trên khắp Việt Nam.',
   },
 ];
 
@@ -45,10 +45,10 @@ const defaultCollections: any[] = [
     link: '/collection/men-wear',
   },
   {
-    title: 'WOMEN ACTIVE',
-    subtitle: 'Nhập CMVSEAMLESS Giảm 50K cho BST Seamless',
+    title: 'MEN ACTIVE',
+    subtitle: 'Nhập CMVSEAMLESS Giảm 50K cho BST Seamless Nam',
     image:
-      'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&h=600&fit=crop',
+      'https://res.cloudinary.com/ddrrh2cxt/image/upload/v1765608581/download_4_s3bbn9.jpg',
     buttonText: 'KHÁM PHÁ',
     link: '/collection/women-active',
   },
@@ -66,11 +66,24 @@ const HomePage: React.FC = () => {
   const { data: categoriesRes, isLoading } = useCategories();
   const swiperRef = useRef(null);
   const { data: products } = useProducts({ limit: 10 });
-  console.log('products', products);
+  useEffect(() => {
+    notification.open({
+      message: 'Thông báo',
+      description: (
+        <div className="text-sm">
+          Backend NestJS được deploy miễn phí trên Render.
+          <br />
+          Nếu API chưa có dữ liệu, vui lòng reload sau <b>1 phút</b>.
+        </div>
+      ),
+      duration: 0,
+    });
+  }, []);
   return (
     <MainLayout>
       <HeroSection />
       <SectionLayout
+        enableHorizontalScroll={false}
         title=" Danh Mục Sản Phẩm"
         subtitle="Khám phá bộ sưu tập đa dạng dành cho phái mạnh"
       >
@@ -92,11 +105,11 @@ const HomePage: React.FC = () => {
         title="Bộ Sưu Tập Nổi Bật"
         subtitle="Khám phá những collection độc đáo và ưu đãi hấp dẫn"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
           {defaultCollections.slice(0, 3).map((collection, index) => (
             <div
               key={index}
-              className="relative h-[350px] lg:h-[480px] overflow-hidden rounded-2xl group shadow-lg hover:shadow-2xl transition-shadow duration-300"
+              className="relative h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] xl:h-[480px] overflow-hidden rounded-xl sm:rounded-2xl group shadow-lg hover:shadow-2xl transition-shadow duration-300"
             >
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
@@ -107,21 +120,21 @@ const HomePage: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent group-hover:from-black/80 group-hover:via-black/50 transition-all duration-300" />
               </div>
 
-              <div className="relative h-full flex flex-col justify-end p-5 lg:p-8">
-                <div className="text-white space-y-3 lg:space-y-4 transform transition-transform duration-300 group-hover:translate-y-[-8px]">
-                  <h3 className="text-2xl lg:text-3xl xl:text-4xl font-bold tracking-wider uppercase">
+              <div className="relative h-full flex flex-col justify-end p-4 sm:p-5 md:p-6 lg:p-8">
+                <div className="text-white space-y-2 sm:space-y-3 lg:space-y-4 transform transition-transform duration-300 group-hover:translate-y-[-8px]">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-bold tracking-wide sm:tracking-wider uppercase leading-tight">
                     {collection.title}
                   </h3>
 
-                  <p className="text-xs lg:text-sm font-light leading-relaxed line-clamp-2">
+                  <p className="text-xs sm:text-sm font-light leading-relaxed line-clamp-2 opacity-90">
                     {collection.subtitle}
                   </p>
 
-                  <div className="pt-1 lg:pt-2">
+                  <div className="pt-1 sm:pt-2">
                     <Button
                       type="primary"
                       size="middle"
-                      className="bg-white text-gray-900 font-semibold hover:bg-gray-900 hover:text-white border-0 px-6 lg:px-8 h-10 lg:h-11 text-xs lg:text-sm rounded-full transition-all duration-300 hover:scale-105 shadow-lg"
+                      className="bg-white text-gray-900 font-semibold hover:bg-gray-900 hover:text-white border-0 px-4 sm:px-6 lg:px-8 h-9 sm:h-10 lg:h-11 text-xs sm:text-sm rounded-full transition-all duration-300 hover:scale-105 shadow-lg"
                       onClick={() => (window.location.href = collection.link)}
                     >
                       {collection.buttonText}
@@ -130,7 +143,7 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-12 sm:h-12 border-t-2 border-r-2 border-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
           ))}
         </div>
@@ -138,32 +151,20 @@ const HomePage: React.FC = () => {
       <ProductTestimonialSection />
 
       <SectionLayout
-        title=" Danh Mục Sản Phẩm"
+        title="Sản phẩm nổi bật"
         subtitle="Khám phá bộ sưu tập đa dạng dành cho phái mạnh"
+        enableHorizontalScroll={true}
+        viewAllText="Xem thêm"
+        onViewAllClick={() => router.push('/search')}
+        showViewAllButton
       >
-        <div>
-          <div className="flex flex-wrap justify-center gap-10">
-            {products?.data?.map((product: any) => (
-              <ProductItem key={product._id} product={product} />
-            ))}
-          </div>
-          <div className="text-center mt-4">
-            <Button
-              onClick={() => {
-                router.push('/search');
-              }}
-              type="default"
-              size="large"
-              className="px-8"
-            >
-              Xem Tất Cả Sản Phẩm
-            </Button>
-          </div>
-        </div>
+        {products?.data?.map((product: any) => (
+          <ProductItem key={product._id} product={product} />
+        ))}
       </SectionLayout>
-      <section className="py-12 lg:py-16 px-4 lg:px-8 border-t border-gray-200">
+      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 border-t border-gray-200">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+          <div className="grid grid-cols-3 gap-4 sm:gap-8 lg:gap-12">
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
@@ -171,16 +172,18 @@ const HomePage: React.FC = () => {
                   key={feature.id}
                   className="flex flex-col items-center text-center"
                 >
-                  <div className="mb-4">
+                  <div className="mb-2 sm:mb-4">
                     <Icon
-                      className="w-12 h-12 text-gray-800"
+                      className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-gray-800"
                       strokeWidth={1.5}
                     />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-gray-900">
+                  <h3 className="text-xs sm:text-base lg:text-lg font-semibold mb-1 sm:mb-2 text-gray-900">
                     {feature.title}
                   </h3>
-                  <p className="text-sm text-gray-600">{feature.description}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
               );
             })}

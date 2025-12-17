@@ -17,35 +17,28 @@ import Link from 'next/link';
 
 const { Footer: AntFooter } = Layout;
 const { Title, Text, Paragraph } = Typography;
-
 const Footer: React.FC = () => {
   const footerLinks = {
     company: [
-      { name: 'About YINSEN', href: '#' },
-      { name: 'Our Story', href: '#' },
-      { name: 'Careers', href: '#' },
-      { name: 'Press & Media', href: '#' },
-      { name: 'Store Locations', href: '#' },
+      { name: 'Về YINSEN', href: '#' },
+      { name: 'Tuyển Dụng', href: '#' },
+      { name: 'Hệ Thống Cửa Hàng', href: '#' },
     ],
     support: [
-      { name: 'Size Guide', href: '#' },
-      { name: 'Customer Care', href: '#' },
-      { name: 'Return & Exchange', href: '#' },
-      { name: 'Shipping Info', href: '#' },
-      { name: 'Care Instructions', href: '#' },
+      { name: 'Chăm Sóc Khách Hàng', href: '#' },
+      { name: 'Đổi & Trả Hàng', href: '#' },
+      { name: 'Thông Tin Vận Chuyển', href: '#' },
     ],
     collections: [
-      { name: 'New Arrivals', href: '#' },
-      { name: 'Premium Collection', href: '#' },
-      { name: 'Business Wear', href: '#' },
-      { name: 'Casual Style', href: '#' },
-      { name: 'Accessories', href: '#' },
+      { name: 'Hàng Mới Về', href: '#' },
+      { name: 'Bộ Sưu Tập Cao Cấp', href: '#' },
+      { name: 'Phong Cách Thường Ngày', href: '#' },
+      { name: 'Phụ Kiện', href: '#' },
     ],
     policy: [
-      { name: 'Privacy Policy', href: '#' },
-      { name: 'Terms of Service', href: '#' },
-      { name: 'Cookie Policy', href: '#' },
-      { name: 'Payment Security', href: '#' },
+      { name: 'Chính Sách Bảo Mật', href: '#' },
+      { name: 'Điều Khoản Dịch Vụ', href: '#' },
+      { name: 'Bảo Mật Thanh Toán', href: '#' },
     ],
   };
 
@@ -100,8 +93,8 @@ const Footer: React.FC = () => {
                 </div>
 
                 <Paragraph className="!text-gray-300 ">
-                  Redefining men's fashion with premium quality, contemporary
-                  designs, and unmatched craftsmanship since 2018.
+                  Nâng tầm thời trang nam bằng chất lượng cao cấp, thiết kế hiện
+                  đại và sự tinh xảo trong từng chi tiết từ năm 2025.
                 </Paragraph>
 
                 <div className="space-y-4">
@@ -113,9 +106,9 @@ const Footer: React.FC = () => {
 
                 <div className="space-y-4">
                   <Text className="!text-white tracking-wider">
-                    FOLLOW OUR JOURNEY
+                    THEO DÕI CHÚNG TÔI
                   </Text>
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-3 mt-2">
                     {socialMediaLinks.map((social, index) => (
                       <div key={index} className="group relative">
                         <Button
@@ -146,7 +139,7 @@ const Footer: React.FC = () => {
                     >
                       COMPANY
                     </Title>
-                    <ul className="space-y-3">
+                    <ul className="space-y-3 mt-4!">
                       {footerLinks.company.map((link, index) => (
                         <li key={index}>
                           <Link
@@ -170,7 +163,7 @@ const Footer: React.FC = () => {
                     >
                       SUPPORT
                     </Title>
-                    <ul className="space-y-3">
+                    <ul className="space-y-3 mt-4!">
                       {footerLinks.support.map((link, index) => (
                         <li key={index}>
                           <Link
@@ -194,7 +187,7 @@ const Footer: React.FC = () => {
                     >
                       COLLECTIONS
                     </Title>
-                    <ul className="space-y-3">
+                    <ul className="space-y-3 mt-4!">
                       {footerLinks.collections.map((link, index) => (
                         <li key={index}>
                           <Link
@@ -218,7 +211,7 @@ const Footer: React.FC = () => {
                     >
                       CONTACT
                     </Title>
-                    <div className="space-y-4">
+                    <div className="space-y-4 mt-4!">
                       <div className="flex items-start space-x-3 group">
                         <EnvironmentOutlined className="!text-blue-400 mt-1 group-hover:scale-110 transition-transform duration-200" />
                         <div>
