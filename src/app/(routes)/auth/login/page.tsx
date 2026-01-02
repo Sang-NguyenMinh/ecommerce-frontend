@@ -61,14 +61,18 @@ export default function LoginPage() {
               { type: 'email', message: 'Email không hợp lệ!' },
             ]}
           >
-            <Input size="large" placeholder="Email" />
+            <Input size="large" value={'Admin@gmail.com'} placeholder="Email" />
           </Form.Item>
 
           <Form.Item
             name="password"
             rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
           >
-            <Input.Password size="large" placeholder="Mật khẩu" />
+            <Input.Password
+              size="large"
+              value={'Admin@gmail.com'}
+              placeholder="Mật khẩu"
+            />
           </Form.Item>
 
           <div className="text-right mb-3">
