@@ -24,8 +24,8 @@ const SectionLayout: React.FC<SectionLayoutProps> = ({
   onViewAllClick,
 }) => {
   return (
-    <section className={`w-full py-8 lg:py-20 ${className}`}>
-      <div className="mx-auto px-4">
+    <section className={`w-full mr-auto! py-8 lg:py-20 ${className}`}>
+      <div className="mx-auto! px-4">
         <div className={`text-center mb-6 lg:mb-10 ${headerClassName}`}>
           <h2 className="text-2xl lg:text-4xl font-bold mb-2 lg:mb-4 text-gray-900">
             {title}

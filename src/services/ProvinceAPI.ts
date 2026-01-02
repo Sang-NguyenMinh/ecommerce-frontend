@@ -1,21 +1,25 @@
 import axios from 'axios';
 
 // @/services/provinceApi.ts (hoặc @/lib/provinceApi.ts)
-const PROVINCE_API = 'https://provinces.open-api.vn/api';
+const PROVINCE_API = 'https://open.oapi.vn/location';
 
 export const provinceApi = {
   getProvinces: async () => {
-    const res = await axios.get(`${PROVINCE_API}/p/`);
+    const res = await axios.get(`${PROVINCE_API}/provinces?page=0&size=100`);
     return res.data;
   },
 
-  getDistricts: async (provinceCode: string) => {
-    const res = await axios.get(`${PROVINCE_API}/p/${provinceCode}?depth=2`);
-    return res.data.districts;
+  getDistricts: async (provinceId: string) => {
+    const res = await axios.get(
+      `${PROVINCE_API}/districts/${provinceId}?page=0&size=100`,
+    );
+    return res.data;
   },
 
-  getWards: async (districtCode: string) => {
-    const res = await axios.get(`${PROVINCE_API}/d/${districtCode}?depth=2`);
-    return res.data.wards;
+  getWards: async (districtId: string) => {
+    const res = await axios.get(
+      `${PROVINCE_API}/wards/${districtId}?page=0&size=100`,
+    );
+    return res.data;
   },
 };

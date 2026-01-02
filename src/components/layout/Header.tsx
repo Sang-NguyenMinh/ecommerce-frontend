@@ -24,6 +24,7 @@ import {
 import { useRouter } from 'next/navigation';
 import CartIcon from '../base/CartIcon';
 import { on } from 'events';
+import { createSlug } from '@/utils/slug';
 const { Header: AntHeader } = Layout;
 const { Search } = Input;
 
@@ -174,12 +175,21 @@ const Header: React.FC = () => {
         </span>
       ),
       children: [
-        { key: 'ao-so-mi-nam', label: 'Áo sơ mi nam' },
-        { key: 'ao-thun-nam', label: 'Áo thun nam' },
-        { key: 'ao-polo-nam', label: 'Áo polo nam' },
-        { key: 'ao-khoac-nam', label: 'Áo khoác nam' },
+        {
+          key: createSlug('Áo sơ mi nam', '683ff3760d90164d378fbf30'),
+          label: 'Áo sơ mi nam',
+        },
+        {
+          key: createSlug('Áo thun nam', '683ff3760d90164d378fbf2f'),
+          label: 'Áo thun nam',
+        },
+        {
+          key: createSlug('Áo polo nam', '683ff3760d90164d378fbf2e'),
+          label: 'Áo polo nam',
+        },
       ],
     },
+
     {
       key: 'quan-nam',
       label: (
@@ -188,10 +198,18 @@ const Header: React.FC = () => {
         </span>
       ),
       children: [
-        { key: 'quan-jean', label: 'Quần jean' },
-        { key: 'quan-tay', label: 'Quần tây' },
-        { key: 'quan-short', label: 'Quần short' },
-        { key: 'quan-kaki', label: 'Quần kaki' },
+        {
+          key: createSlug('Quần short', '683ff3760d90164d378fbf31'),
+          label: 'Quần short',
+        },
+        {
+          key: createSlug('Quần kaki', '69457020c5c2156da26abcf4'),
+          label: 'Quần kaki',
+        },
+        {
+          key: createSlug('Quần dài', '683ff3760d90164d378fbf32'),
+          label: 'Quần dài',
+        },
       ],
     },
     {
@@ -202,14 +220,26 @@ const Header: React.FC = () => {
         </span>
       ),
       children: [
-        { key: 'voyages-ss25', label: 'Voyages SS25' },
-        { key: 'kim-ly-collection', label: 'Kim Lý Collection' },
-        { key: 'spring-summer', label: 'Spring Summer 2025' },
+        {
+          key: createSlug('Summer 2025', '6945710bc5c2156da26abd51'),
+          label: 'Summer 2025',
+        },
+        {
+          key: createSlug('Spring 2025', '694570cfc5c2156da26abd2f'),
+          label: 'Spring 2025',
+        },
+        {
+          key: createSlug('Tết 2026', '69457143c5c2156da26abd6c'),
+          label: 'Tết 2026',
+        },
       ],
     },
     {
       key: 'he-thong-cua-hang',
       label: 'Hệ thống cửa hàng',
+      onClick: () => {
+        router.push('/branches');
+      },
     },
     {
       key: 'uu-dai',
@@ -261,13 +291,19 @@ const Header: React.FC = () => {
             }}
             className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-black tracking-wider cursor-pointer"
           >
-            ✓ TORANO
+            ✓ NMS
           </div>
         </div>
 
         <Menu
           mode="horizontal"
           items={menuItems}
+          onClick={({ key }) => {
+            const item = menuItems.find((item) => item.key === key);
+            if (!item?.onClick && key.includes('-')) {
+              router.push(`/category/${key}`);
+            }
+          }}
           className="hidden !border-none   !text-base !font-medium"
           style={{ minWidth: 0 }}
         />
@@ -314,6 +350,13 @@ const Header: React.FC = () => {
         >
           <Menu
             mode="vertical"
+            onClick={({ key }) => {
+              const item = menuItems.find((item) => item.key === key);
+              if (!item?.onClick && key.includes('-')) {
+                router.push(`/category/${key}`);
+                setDrawerVisible(false);
+              }
+            }}
             items={menuItems}
             className="!border-none mb-4 text-sm sm:text-base"
           />

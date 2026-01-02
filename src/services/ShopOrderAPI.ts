@@ -51,6 +51,10 @@ export const ShopOrderAPI = {
   getOrderByUserId: (userId: string) => {
     return axios.get(`${SHOP_ORDER_URL}/user/${userId}`);
   },
+
+  checkOutOrder: (data: FormData) => {
+    return axios.post(`${SHOP_ORDER_URL}/checkout`, data);
+  },
 };
 
 export interface ITrackGuestOrder {

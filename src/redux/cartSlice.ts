@@ -37,7 +37,6 @@ const cartSlice = createSlice({
     addToCart(state, action: PayloadAction<CartItem>) {
       const newItem = action.payload;
 
-      // Check if item already exists in cart
       const existingItemIndex = state.items.findIndex(
         (item) =>
           item.productItemId._id === newItem.productItemId._id &&
@@ -46,11 +45,9 @@ const cartSlice = createSlice({
       );
 
       if (existingItemIndex > -1) {
-        // Update quantity if item exists
         state.items[existingItemIndex].qty += newItem.qty;
         message.success('Đã cập nhật số lượng trong giỏ hàng');
       } else {
-        // Add new item
         state.items.push(newItem);
         message.success('Đã thêm sản phẩm vào giỏ hàng');
       }

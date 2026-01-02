@@ -47,15 +47,17 @@ const CategoryClient: React.FC<CategoryClientProps> = ({
   const { allSizes, allColors } = useMemo(() => {
     const sizesSet = new Set<string>();
     const colorsSet = new Set<string>();
+
     variations.data?.forEach((variation) => {
       if (variation?.name === 'Kích thước') {
-        console.log(variation.name, 'variation.name');
         variation.options?.forEach((opt) => sizesSet.add(opt.name));
       }
       if (variation?.name === 'Màu sắc') {
         variation.options?.forEach((opt) => colorsSet.add(opt.name));
       }
     });
+
+    console.log('all sizes', Array.from(sizesSet));
 
     return {
       allSizes: Array.from(sizesSet),

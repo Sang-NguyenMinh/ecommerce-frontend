@@ -34,26 +34,19 @@ import {
 } from '@/redux/cartSlice';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
-import { useCreateShopOrder } from '@/hooks/order';
+import { useCheckOutOrder, useCreateShopOrder } from '@/hooks/order';
 import { useUserAddress } from '@/hooks/user-address';
 import { provinceApi } from '@/services/ProvinceAPI';
+import { PaymentTypeEnum } from '@/configs/constants';
 
 const { Option } = Select;
-
-enum PaymentTypeEnum {
-  CASH = 'Cash',
-  BANK_TRANSFER = 'Bank Transfer',
-  MOMO = 'MoMo',
-  PAYPAL = 'PayPal',
-}
 
 const PaymentPage: React.FC = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [form] = Form.useForm();
 
-  const { mutate: createShopOrder, isPending: isCreating } =
-    useCreateShopOrder();
+  const { mutate: checkOutOrder, isPending: isCreating } = useCheckOutOrder();
 
   const cartItems = useAppSelector(selectCartItems);
   const user = useAppSelector((state: any) => state.user);
@@ -73,7 +66,7 @@ const PaymentPage: React.FC = () => {
     const loadProvinces = async () => {
       try {
         const data = await provinceApi.getProvinces();
-        setProvinces(data);
+        setProvinces(data.data);
       } catch (error) {
         message.error('Không thể tải danh sách tỉnh thành');
       }
@@ -106,7 +99,8 @@ const PaymentPage: React.FC = () => {
             const districtData = await provinceApi.getDistricts(
               provinceMatch.code,
             );
-            setDistricts(districtData);
+            setDistricts(districtData.data);
+            console.log('districtData', districtData);
 
             const districtMatch = districtData.find(
               (d) =>
@@ -119,7 +113,7 @@ const PaymentPage: React.FC = () => {
               form.setFieldsValue({ district: districtMatch.code });
 
               const wardData = await provinceApi.getWards(districtMatch.code);
-              setWards(wardData);
+              setWards(wardData.data);
 
               const wardMatch = wardData.find(
                 (w) =>
@@ -153,7 +147,7 @@ const PaymentPage: React.FC = () => {
 
     try {
       const districtData = await provinceApi.getDistricts(value);
-      setDistricts(districtData);
+      setDistricts(districtData.data);
     } catch (error) {
       message.error('Không thể tải danh sách quận huyện');
     }
@@ -166,7 +160,7 @@ const PaymentPage: React.FC = () => {
     form.setFieldsValue({ ward: undefined });
     try {
       const wardData = await provinceApi.getWards(value);
-      setWards(wardData);
+      setWards(wardData.data);
     } catch (error) {
       message.error('Không thể tải danh sách phường xã');
     }
@@ -246,8 +240,6 @@ const PaymentPage: React.FC = () => {
   };
 
   const handleSubmitOrder = async (values: any) => {
-    console.log('values', values);
-
     if (selectedItems.size === 0) {
       message.error('Vui lòng chọn ít nhất một sản phẩm để đặt hàng');
       return;
@@ -300,23 +292,18 @@ const PaymentPage: React.FC = () => {
         note: values.note,
       };
 
-      // Nếu user chưa có address, gửi thông tin từ form
       if (!address?.data || address.data.length === 0) {
         orderPayload.recipientName = values.fullName;
         orderPayload.phoneNumber = values.phone;
         orderPayload.address = values.address;
-        orderPayload.city = provinceName; // Gửi NAME thay vì CODE
-        orderPayload.district = districtName; // Gửi NAME thay vì CODE
-        orderPayload.ward = wardName; // Gửi NAME thay vì CODE
+        orderPayload.city = provinceName;
+        orderPayload.district = districtName;
+        orderPayload.ward = wardName;
       } else {
-        // User đã có address - dùng address mặc định
         orderPayload.shippingAddress = address.data[0]._id;
       }
 
-      // Thêm email để nhận thông báo
-      if (values.email) {
-        orderPayload.guestEmail = values.email;
-      }
+      orderPayload.guestEmail = values.email;
     } else {
       // GUEST ORDER
       orderPayload = {
@@ -324,7 +311,7 @@ const PaymentPage: React.FC = () => {
         guestEmail: values.email,
         guestPhone: values.phone,
         guestName: values.fullName,
-        guestShippingAddress: fullAddress, // Đã chứa NAME
+        guestShippingAddress: fullAddress,
         orderItems,
         paymentType: selectedPaymentType,
         shippingMethodId: '507f1f77bcf86cd799439011',
@@ -332,35 +319,33 @@ const PaymentPage: React.FC = () => {
       };
     }
 
-    console.log('Order payload:', orderPayload);
-
-    // Gọi API tạo đơn hàng
-    createShopOrder(orderPayload, {
+    checkOutOrder(orderPayload, {
       onSuccess: (response) => {
-        console.log('Order response:', response);
-
-        if (response.data.order._id) {
+        if (response.data?.orderId) {
           localStorage.setItem(
             'lastGuestOrder',
             JSON.stringify({
-              orderId: response.data.order._id,
+              orderId: response.data.orderId,
             }),
           );
         }
 
-        // Xóa các item đã đặt hàng khỏi giỏ
-        const orderedItemIds = Array.from(selectedItems);
-        dispatch(removeSelectedItems(orderedItemIds));
+        if (selectedPaymentType === PaymentTypeEnum.CASH) {
+          const orderedItemIds = Array.from(selectedItems);
 
-        // Redirect về trang thành công
-        setTimeout(() => {
-          if (response.data.order?.isGuestOrder) {
-            router.push(`/track-order?orderId=${response.data.order._id}`);
-          } else {
-            router.push(`/track-order`);
+          dispatch(removeSelectedItems(orderedItemIds));
+
+          setTimeout(() => {
+            router.push(`/track-order?orderId=${response.data.orderId}`);
+          }, 1500);
+        } else {
+          if (response.data?.payUrl) {
+            window.location.href = response.data?.payUrl;
+            return;
           }
-        }, 1500);
+        }
       },
+
       onError: (error: any) => {
         console.error('Error creating order:', error);
       },
@@ -488,7 +473,7 @@ const PaymentPage: React.FC = () => {
                           }
                         >
                           {provinces.map((province) => (
-                            <Option key={province.code} value={province.code}>
+                            <Option key={province.id} value={province.id}>
                               {province.name}
                             </Option>
                           ))}
@@ -519,7 +504,7 @@ const PaymentPage: React.FC = () => {
                           }
                         >
                           {districts.map((district) => (
-                            <Option key={district.code} value={district.code}>
+                            <Option key={district.id} value={district.id}>
                               {district.name}
                             </Option>
                           ))}
@@ -549,7 +534,7 @@ const PaymentPage: React.FC = () => {
                           }
                         >
                           {wards.map((ward) => (
-                            <Option key={ward.code} value={ward.code}>
+                            <Option key={ward.id} value={ward.id}>
                               {ward.name}
                             </Option>
                           ))}
@@ -578,27 +563,10 @@ const PaymentPage: React.FC = () => {
                   className="w-full"
                 >
                   <div className="space-y-3">
-                    <Radio
-                      value={PaymentTypeEnum.CASH}
-                      className="w-full !py-2"
-                    >
-                      <div className="flex items-center">
-                        <TruckOutlined className="mr-2" />
-                        <span className="font-medium">
-                          Thanh toán khi nhận hàng (COD)
-                        </span>
-                      </div>
-                    </Radio>
-
-                    <Radio
-                      value={PaymentTypeEnum.BANK_TRANSFER}
-                      className="w-full p-4"
-                    >
+                    <Radio value={PaymentTypeEnum.MOMO} className="w-full p-4">
                       <div className="flex items-center">
                         <DollarOutlined className="mr-2" />
-                        <span className="font-medium">
-                          Chuyển khoản ngân hàng
-                        </span>
+                        <span className="font-medium">MOMO</span>
                       </div>
                     </Radio>
                   </div>

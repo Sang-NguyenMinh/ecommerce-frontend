@@ -1,8 +1,6 @@
-// src/app/track-order/page.tsx - Hỗ trợ cả Guest và User đã login
-
 'use client';
 
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect, use, useRef } from 'react';
 import {
   Card,
   Input,
@@ -22,11 +20,14 @@ import {
   useTrackGuestOrderByOrderId,
 } from '@/hooks/order';
 import { useAppSelector } from '@/redux/store';
+import { removeSelectedItems } from '@/redux/cartSlice';
+import { getStatusColor, getStatusText } from '@/configs/constants';
 
 const { Step } = Steps;
 
 const TrackOrderPage: React.FC = () => {
   const searchParams = useSearchParams();
+  const mapRef = useRef<any>(null);
   const isAuthenticated = useAppSelector((state) => state.auth.isLoggedIn);
   const userId = useAppSelector((state) => state.user._id);
   const [orderData, setOrderData] = useState<any>(null);
@@ -51,6 +52,12 @@ const TrackOrderPage: React.FC = () => {
         const lastOrderId = localStorage.getItem('lastGuestOrderId');
         if (lastOrderId) {
           setOrderId(lastOrderId);
+
+          userOrdersData?.forEach((order: any) => {
+            if (order.orderId === lastOrderId) {
+              order.dispatch(removeSelectedItems([lastOrderId]));
+            }
+          });
         }
       }
     }
@@ -86,29 +93,6 @@ const TrackOrderPage: React.FC = () => {
     return statusMap[status] || 0;
   };
 
-  const getStatusColor = (status: string) => {
-    const colorMap: { [key: string]: string } = {
-      Pending: 'orange',
-      Processing: 'blue',
-      Shipped: 'cyan',
-      Delivered: 'green',
-      Cancelled: 'red',
-    };
-    return colorMap[status] || 'default';
-  };
-
-  const getStatusText = (status: string) => {
-    const textMap: { [key: string]: string } = {
-      Pending: 'Chờ xác nhận',
-      Processing: 'Đang xử lý',
-      Shipped: 'Đang giao',
-      Delivered: 'Hoàn thành',
-      Cancelled: 'Đã hủy',
-    };
-    return textMap[status] || status;
-  };
-
-  // Columns cho Table khi user đã login
   const columns = [
     {
       title: 'Mã đơn hàng',
@@ -144,7 +128,16 @@ const TrackOrderPage: React.FC = () => {
       title: 'Thao tác',
       key: 'action',
       render: (_: any, record: any) => (
-        <Button type="link" onClick={() => setSelectedOrder(record)}>
+        <Button
+          type="link"
+          onClick={() => {
+            setSelectedOrder(record);
+            mapRef.current?.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+            });
+          }}
+        >
           Xem chi tiết
         </Button>
       ),
@@ -177,7 +170,11 @@ const TrackOrderPage: React.FC = () => {
             {/* Chi tiết đơn hàng khi click vào */}
             {selectedOrder && (
               <>
-                <Card title="Thông tin đơn hàng" className=" mt-6!">
+                <Card
+                  title="Thông tin đơn hàng"
+                  ref={mapRef}
+                  className=" mt-6!"
+                >
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Mã đơn hàng:</span>
@@ -336,7 +333,7 @@ const TrackOrderPage: React.FC = () => {
 
           {!isTracking && orderData && (
             <>
-              <Card title="Thông tin đơn hàng" className="mb-6">
+              <Card ref={mapRef} title="Thông tin đơn hàng" className="mb-6">
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Mã đơn hàng:</span>

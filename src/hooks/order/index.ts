@@ -29,6 +29,17 @@ export const useCreateShopOrder = () =>
     'Tạo đơn hàng thất bại!',
   );
 
+export const useCheckOutOrder = () => {
+  return useMutation({
+    mutationFn: (data: any) => ShopOrderAPI.checkOutOrder(data),
+    onError: (error: any) => {
+      message.error(
+        error?.response?.data?.message ?? 'Không tìm thấy đơn hàng',
+      );
+    },
+  });
+};
+
 export const useTrackGuestOrder = () => {
   return useMutation({
     mutationFn: (data: { orderToken: string; guestEmail: string }) =>

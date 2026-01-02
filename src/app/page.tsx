@@ -13,6 +13,7 @@ import ProductItem from '@/components/ProductItem';
 import { useProducts } from '@/hooks/product';
 import { useRouter } from 'next/navigation';
 import SectionLayout from '@/components/layout/SectionLayout';
+import FloatingLoginButton from '@/components/base/FloatingButton';
 
 const features = [
   {
@@ -93,11 +94,12 @@ const HomePage: React.FC = () => {
           slidesPerView="auto"
           spaceBetween={40}
         >
-          {categoriesRes?.data.map((category) => (
-            <SwiperSlide key={category._id} style={{ width: 'auto' }}>
-              <CategoryItem category={category} />
-            </SwiperSlide>
-          ))}
+          {Array.isArray(categoriesRes?.data) &&
+            categoriesRes.data.map((category) => (
+              <SwiperSlide key={category._id} style={{ width: 'auto' }}>
+                <CategoryItem category={category} />
+              </SwiperSlide>
+            ))}
         </Swiper>
       </SectionLayout>
 
@@ -191,6 +193,7 @@ const HomePage: React.FC = () => {
         </div>
       </section>
       <NewsletterSection />
+      <FloatingLoginButton />
     </MainLayout>
   );
 };
