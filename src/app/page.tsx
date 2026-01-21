@@ -82,7 +82,7 @@ const HomePage: React.FC = () => {
           Nếu API chưa có dữ liệu, vui lòng reload sau <b>1 phút</b>.
         </div>
       ),
-      duration: 20,
+      duration: 0,
     });
   }, []);
 
