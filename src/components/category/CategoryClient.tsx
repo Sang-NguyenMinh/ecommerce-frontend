@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Breadcrumb, Select, Checkbox, Slider, Spin, Empty } from 'antd';
+import {
+  Breadcrumb,
+  Select,
+  Checkbox,
+  Slider,
+  Spin,
+  Empty,
+  Skeleton,
+} from 'antd';
 import { HomeOutlined, UpOutlined, DownOutlined } from '@ant-design/icons';
 import ProductItem from '../ProductItem';
 import { useProducts } from '@/hooks/product';
@@ -182,123 +190,177 @@ const CategoryClient: React.FC<CategoryClientProps> = ({
               </div>
 
               {/* Size Filter */}
-              {allSizes.length > 0 && (
-                <FilterSection
-                  title="Kích thước"
-                  expanded={expandSize}
-                  onToggle={() => setExpandSize(!expandSize)}
-                >
+              {isLoading ? (
+                <div className="px-6 py-5 border-b border-gray-200">
+                  <Skeleton.Input
+                    active
+                    style={{ width: 100, height: 20, marginBottom: 16 }}
+                  />
                   <div className="grid grid-cols-4 gap-2">
-                    {allSizes.map((size) => (
-                      <label
-                        key={size}
-                        className={`flex items-center justify-center h-11 border rounded-md cursor-pointer transition-all ${
-                          selectedSizes.includes(size)
-                            ? 'border-black bg-black text-white'
-                            : 'border-gray-200 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          className="hidden"
-                          checked={selectedSizes.includes(size)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedSizes([...selectedSizes, size]);
-                            } else {
-                              setSelectedSizes(
-                                selectedSizes.filter((s) => s !== size),
-                              );
-                            }
-                          }}
-                        />
-                        <span className="text-sm font-medium">{size}</span>
-                      </label>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                      <Skeleton.Button
+                        key={i}
+                        active
+                        style={{ width: '100%', height: 44, borderRadius: 6 }}
+                      />
                     ))}
                   </div>
-                </FilterSection>
+                </div>
+              ) : (
+                allSizes.length > 0 && (
+                  <FilterSection
+                    title="Kích thước"
+                    expanded={expandSize}
+                    onToggle={() => setExpandSize(!expandSize)}
+                  >
+                    <div className="grid grid-cols-4 gap-2">
+                      {allSizes.map((size) => (
+                        <label
+                          key={size}
+                          className={`flex items-center justify-center h-11 border rounded-md cursor-pointer transition-all ${
+                            selectedSizes.includes(size)
+                              ? 'border-black bg-black text-white'
+                              : 'border-gray-200 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            className="hidden"
+                            checked={selectedSizes.includes(size)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedSizes([...selectedSizes, size]);
+                              } else {
+                                setSelectedSizes(
+                                  selectedSizes.filter((s) => s !== size),
+                                );
+                              }
+                            }}
+                          />
+                          <span className="text-sm font-medium">{size}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </FilterSection>
+                )
               )}
 
               {/* Color Filter */}
-              {allColors.length > 0 && (
-                <FilterSection
-                  title="Màu sắc"
-                  expanded={expandColor}
-                  onToggle={() => setExpandColor(!expandColor)}
-                >
+              {isLoading ? (
+                <div className="px-6 py-5 border-b border-gray-200">
+                  <Skeleton.Input
+                    active
+                    style={{ width: 80, height: 20, marginBottom: 16 }}
+                  />
                   <div className="grid grid-cols-4 gap-4">
-                    {allColors.map((color) => (
-                      <label
-                        key={color}
-                        className="flex flex-col items-center cursor-pointer group"
-                        title={color}
-                      >
-                        <input
-                          type="checkbox"
-                          className="hidden"
-                          checked={selectedColors.includes(color)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedColors([...selectedColors, color]);
-                            } else {
-                              setSelectedColors(
-                                selectedColors.filter((c) => c !== color),
-                              );
-                            }
-                          }}
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                      <div key={i} className="flex flex-col items-center gap-2">
+                        <Skeleton.Avatar active size={44} shape="circle" />
+                        <Skeleton.Input
+                          active
+                          style={{ width: 40, height: 12 }}
                         />
-                        <div
-                          className={`w-11 h-11 rounded-full border-2 transition-all ${
-                            selectedColors.includes(color)
-                              ? 'border-black ring-2 ring-gray-300 ring-offset-2'
-                              : 'border-gray-200 group-hover:border-gray-400'
-                          }`}
-                          style={{
-                            backgroundColor:
-                              colorMap[color] || color.toLowerCase(),
-                          }}
-                        />
-                        <span className="text-xs text-gray-600 mt-2 text-center">
-                          {color}
-                        </span>
-                      </label>
+                      </div>
                     ))}
                   </div>
-                </FilterSection>
+                </div>
+              ) : (
+                allColors.length > 0 && (
+                  <FilterSection
+                    title="Màu sắc"
+                    expanded={expandColor}
+                    onToggle={() => setExpandColor(!expandColor)}
+                  >
+                    <div className="grid grid-cols-4 gap-4">
+                      {allColors.map((color) => (
+                        <label
+                          key={color}
+                          className="flex flex-col items-center cursor-pointer group"
+                          title={color}
+                        >
+                          <input
+                            type="checkbox"
+                            className="hidden"
+                            checked={selectedColors.includes(color)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedColors([...selectedColors, color]);
+                              } else {
+                                setSelectedColors(
+                                  selectedColors.filter((c) => c !== color),
+                                );
+                              }
+                            }}
+                          />
+                          <div
+                            className={`w-11 h-11 rounded-full border-2 transition-all ${
+                              selectedColors.includes(color)
+                                ? 'border-black ring-2 ring-gray-300 ring-offset-2'
+                                : 'border-gray-200 group-hover:border-gray-400'
+                            }`}
+                            style={{
+                              backgroundColor:
+                                colorMap[color] || color.toLowerCase(),
+                            }}
+                          />
+                          <span className="text-xs text-gray-600 mt-2 text-center">
+                            {color}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </FilterSection>
+                )
               )}
 
               {/* Price Filter */}
-              <FilterSection
-                title="Giá"
-                expanded={expandPrice}
-                onToggle={() => setExpandPrice(!expandPrice)}
-              >
-                <Slider
-                  range
-                  min={0}
-                  max={200000000}
-                  step={10000}
-                  value={priceRange}
-                  onChange={(value) => setPriceRange(value as [number, number])}
-                  tooltip={{
-                    formatter: (value) => `${value?.toLocaleString('vi-VN')}đ`,
-                  }}
-                />
-                <div className="flex justify-between mt-4 text-sm">
-                  <span className="text-gray-600">
-                    {priceRange[0].toLocaleString('vi-VN')}đ
-                  </span>
-                  <span className="text-gray-900 font-medium">
-                    {priceRange[1].toLocaleString('vi-VN')}đ
-                  </span>
+              {isLoading ? (
+                <div className="px-6 py-5">
+                  <Skeleton.Input
+                    active
+                    style={{ width: 60, height: 20, marginBottom: 16 }}
+                  />
+                  <Skeleton.Input active block style={{ height: 20 }} />
+                  <div className="flex justify-between mt-4">
+                    <Skeleton.Input active style={{ width: 80, height: 16 }} />
+                    <Skeleton.Input active style={{ width: 80, height: 16 }} />
+                  </div>
                 </div>
-              </FilterSection>
+              ) : (
+                <FilterSection
+                  title="Giá"
+                  expanded={expandPrice}
+                  onToggle={() => setExpandPrice(!expandPrice)}
+                >
+                  <Slider
+                    range
+                    min={0}
+                    max={200000000}
+                    step={10000}
+                    value={priceRange}
+                    onChange={(value) =>
+                      setPriceRange(value as [number, number])
+                    }
+                    tooltip={{
+                      formatter: (value) =>
+                        `${value?.toLocaleString('vi-VN')}đ`,
+                    }}
+                  />
+                  <div className="flex justify-between mt-4 text-sm">
+                    <span className="text-gray-600">
+                      {priceRange[0].toLocaleString('vi-VN')}đ
+                    </span>
+                    <span className="text-gray-900 font-medium">
+                      {priceRange[1].toLocaleString('vi-VN')}đ
+                    </span>
+                  </div>
+                </FilterSection>
+              )}
             </div>
           </div>
 
           {/* Products Grid */}
           <div className="col-span-12 lg:col-span-9">
-            {/* Header with Sort */}
             <div className="bg-white rounded-lg shadow-sm p-4 mb-4  flex items-center justify-between">
               <h1 className="text-2xl font-bold mb-0!">
                 {searchKeyword
@@ -324,8 +386,29 @@ const CategoryClient: React.FC<CategoryClientProps> = ({
 
             {/* Products */}
             {isLoading ? (
-              <div className="flex justify-center items-center h-64">
-                <Spin size="large" />
+              <div className="flex py-4 gap-10 flex-wrap">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <div key={i} style={{ width: 280 }}>
+                    <Skeleton.Image
+                      active
+                      style={{ width: 280, height: 350, borderRadius: 12 }}
+                    />
+                    <div className="mt-3 space-y-2">
+                      <Skeleton.Input
+                        active
+                        style={{ width: '100%', height: 20 }}
+                      />
+                      <Skeleton.Input
+                        active
+                        style={{ width: '60%', height: 24 }}
+                      />
+                      <Skeleton.Button
+                        active
+                        style={{ width: '40%', height: 20 }}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : filteredProducts.length > 0 ? (
               <div className="flex py-4 gap-10 flex-wrap">

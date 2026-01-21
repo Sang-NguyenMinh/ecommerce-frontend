@@ -20,7 +20,7 @@ const { Title, Text, Paragraph } = Typography;
 const Footer: React.FC = () => {
   const footerLinks = {
     company: [
-      { name: 'Về YINSEN', href: '#' },
+      { name: 'Về NMS', href: '#' },
       { name: 'Tuyển Dụng', href: '#' },
       { name: 'Hệ Thống Cửa Hàng', href: '#' },
     ],
@@ -88,7 +88,7 @@ const Footer: React.FC = () => {
                     <CrownOutlined className="text-white text-xl" />
                   </div>
                   <Title level={2} className="!text-white !mb-0   ">
-                    YINSEN
+                    NMS
                   </Title>
                 </div>
 
@@ -253,7 +253,7 @@ const Footer: React.FC = () => {
             <Row justify="space-between" align="middle" gutter={[16, 16]}>
               <Col xs={24} md={12} className="text-center md:text-left">
                 <Text className="!text-gray-400 text-sm">
-                  © 2025 YINSEN Fashion. Crafted with{' '}
+                  © 2025 NMS Fashion. Crafted with{' '}
                   <HeartOutlined className="!text-blue-400 mx-1" />
                   in Vietnam
                 </Text>

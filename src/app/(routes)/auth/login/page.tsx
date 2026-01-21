@@ -35,7 +35,7 @@ export default function LoginPage() {
         const userResp = await UserAPI.getUser();
         dispatch(getUserSuccess(userResp.data));
 
-        router.push('/');
+        router.push('/dashboard/categories');
       })
       .catch((err) => {
         console.error('Login failed:', err);

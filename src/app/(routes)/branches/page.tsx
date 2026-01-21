@@ -48,7 +48,7 @@ const StoreSystemPage = () => {
   const stores: Store[] = [
     {
       id: 3,
-      name: 'YINSEN Crescent Mall',
+      name: 'NMS Crescent Mall',
       city: 'HCM',
       district: 'Quận 7',
       address: '101 Tôn Dật Tiên, Phường Tân Phú',
@@ -63,7 +63,7 @@ const StoreSystemPage = () => {
 
     {
       id: 5,
-      name: 'YINSEN Vincom Trần Duy Hưng',
+      name: 'NMS Vincom Trần Duy Hưng',
       city: 'HN',
       district: 'Cầu Giấy',
       address: '119 Trần Duy Hưng, Phường Trung Hòa',
@@ -77,7 +77,7 @@ const StoreSystemPage = () => {
     },
     {
       id: 6,
-      name: 'YINSEN Tràng Tiền Plaza',
+      name: 'NMS Tràng Tiền Plaza',
       city: 'HN',
       district: 'Hoàn Kiếm',
       address: '24 Hai Bà Trưng, Phường Tràng Tiền',
@@ -132,11 +132,9 @@ const StoreSystemPage = () => {
         <Content className="max-w-7xl  w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
           <div className="mb-8">
             <Title level={2} className="!mb-2">
-              Hệ Thống Cửa Hàng YINSEN
+              Hệ Thống Cửa Hàng NMS
             </Title>
-            <Text className="text-gray-600">
-              Tìm cửa hàng YINSEN gần bạn nhất
-            </Text>
+            <Text className="text-gray-600">Tìm cửa hàng NMS gần bạn nhất</Text>
           </div>
 
           <div className="mb-6 bg-white p-4 lg:p-6 rounded-xl shadow-sm w-full">

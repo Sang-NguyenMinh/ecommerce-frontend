@@ -50,12 +50,12 @@ export default function DashboardSideMenu() {
       { label: <Link href="/dashboard/promotions">Khuyến mãi</Link>, key: '5' },
       { label: <Link href="/dashboard/orders">Đơn hàng</Link>, key: '6' },
       { type: 'divider' },
-      { label: <Link href="/dashboard/users">Khách hàng</Link>, key: '7' },
-      { label: <Link href="/dashboard/variations">Biến thể</Link>, key: '8' },
-      {
-        label: <Link href="/dashboard/configurations">Cấu hình</Link>,
-        key: '9',
-      },
+      // { label: <Link href="/dashboard/users">Khách hàng</Link>, key: '7' },
+      { label: <Link href="/dashboard/variation">Biến thể</Link>, key: '8' },
+      // {
+      //   label: <Link href="/dashboard/configurations">Cấu hình</Link>,
+      //   key: '9',
+      // },
     ],
     [],
   );

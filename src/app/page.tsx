@@ -8,7 +8,7 @@ import CategoryItem from '@/components/CategoryItem';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import ProductTestimonialSection from '@/components/layout/ProductTestimonialSection';
 import { Leaf, MapPin, Package } from 'lucide-react';
-import { Button, notification } from 'antd';
+import { Button, notification, Skeleton } from 'antd';
 import ProductItem from '@/components/ProductItem';
 import { useProducts } from '@/hooks/product';
 import { useRouter } from 'next/navigation';
@@ -62,11 +62,16 @@ const defaultCollections: any[] = [
     link: '/collection/sport',
   },
 ];
+
 const HomePage: React.FC = () => {
   const router = useRouter();
-  const { data: categoriesRes, isLoading } = useCategories();
+  const { data: categoriesRes, isLoading: isLoadingCategories } =
+    useCategories();
   const swiperRef = useRef(null);
-  const { data: products } = useProducts({ limit: 10 });
+  const { data: products, isLoading: isLoadingProducts } = useProducts({
+    limit: 10,
+  });
+
   useEffect(() => {
     notification.open({
       message: 'Thông báo',
@@ -77,16 +82,22 @@ const HomePage: React.FC = () => {
           Nếu API chưa có dữ liệu, vui lòng reload sau <b>1 phút</b>.
         </div>
       ),
-      duration: 0,
+      duration: 20,
     });
   }, []);
+
   return (
     <MainLayout>
       <HeroSection />
+
+      {/* Categories Section */}
       <SectionLayout
         enableHorizontalScroll={false}
-        title=" Danh Mục Sản Phẩm"
+        title="Danh Mục Sản Phẩm"
         subtitle="Khám phá bộ sưu tập đa dạng dành cho phái mạnh"
+        isLoading={isLoadingCategories}
+        skeletonType="category"
+        skeletonCount={5}
       >
         <Swiper
           ref={swiperRef}
@@ -103,6 +114,7 @@ const HomePage: React.FC = () => {
         </Swiper>
       </SectionLayout>
 
+      {/* Collections Section */}
       <SectionLayout
         title="Bộ Sưu Tập Nổi Bật"
         subtitle="Khám phá những collection độc đáo và ưu đãi hấp dẫn"
@@ -150,8 +162,10 @@ const HomePage: React.FC = () => {
           ))}
         </div>
       </SectionLayout>
+
       <ProductTestimonialSection />
 
+      {/* Products Section */}
       <SectionLayout
         title="Sản phẩm nổi bật"
         subtitle="Khám phá bộ sưu tập đa dạng dành cho phái mạnh"
@@ -159,11 +173,16 @@ const HomePage: React.FC = () => {
         viewAllText="Xem thêm"
         onViewAllClick={() => router.push('/search')}
         showViewAllButton
+        isLoading={isLoadingProducts}
+        skeletonType="product"
+        skeletonCount={5}
       >
         {products?.data?.map((product: any) => (
           <ProductItem key={product._id} product={product} />
         ))}
       </SectionLayout>
+
+      {/* Features Section */}
       <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 border-t border-gray-200">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-3 gap-4 sm:gap-8 lg:gap-12">
@@ -192,6 +211,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+
       <NewsletterSection />
       <FloatingLoginButton />
     </MainLayout>

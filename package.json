@@ -33,6 +33,7 @@
     "@tiptap/pm": "^3.13.0",
     "@tiptap/react": "^3.13.0",
     "@tiptap/starter-kit": "^3.13.0",
+    "aframe": "^1.7.1",
     "antd": "^5.25.2",
     "autoprefixer": "^10.4.21",
     "axios": "^1.8.4",

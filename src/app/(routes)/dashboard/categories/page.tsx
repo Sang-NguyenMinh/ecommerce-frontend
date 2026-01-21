@@ -11,6 +11,7 @@ import {
   Image,
   Button,
   Space,
+  notification,
 } from 'antd';
 import {
   PlusOutlined,
@@ -64,7 +65,7 @@ export interface FileUpload {
   url?: string;
 }
 
-const CategoryManagement = () => {
+const CategoryManagement: React.FC = () => {
   const [form] = Form.useForm();
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
 

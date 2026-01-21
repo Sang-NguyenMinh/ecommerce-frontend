@@ -33,7 +33,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/components/CustomNodes/ImageNode/ImageComponent.jsx"
+    "src/components/CustomNodes/ImageNode/ImageComponent.jsx",
+    "src/app/tour/page.js"
   ],
   "exclude": ["node_modules"]
 }

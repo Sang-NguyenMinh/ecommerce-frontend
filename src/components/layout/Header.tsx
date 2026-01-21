@@ -283,6 +283,12 @@ const Header: React.FC = () => {
         </div>
       </div>
 
+      <div className="bg-yellow-50 border-b border-yellow-200 text-yellow-800 text-xs sm:text-sm px-4 py-2 text-center">
+        Website hiện đang trong quá trình phát triển. Một số chức năng và giao
+        diện còn chưa hoàn thiện.
+        <span className="ml-1 font-medium">Xin cảm ơn!</span>
+      </div>
+
       <AntHeader className="!bg-white shadow-sm lg:!px-30 !px-4   max-h-[50px]! sm:min-h-[70px] md:min-h-[80px] flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center x">
           <div
