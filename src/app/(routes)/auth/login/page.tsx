@@ -61,7 +61,11 @@ export default function LoginPage() {
               { type: 'email', message: 'Email không hợp lệ!' },
             ]}
           >
-            <Input size="large" value={'Admin@gmail.com'} placeholder="Email" />
+            <Input
+              size="large"
+              value={'Admin@gmail.com'}
+              placeholder="Admin@gmail.com"
+            />
           </Form.Item>
 
           <Form.Item
@@ -71,7 +75,7 @@ export default function LoginPage() {
             <Input.Password
               size="large"
               value={'Admin@gmail.com'}
-              placeholder="Mật khẩu"
+              placeholder="Admin@gmail.com"
             />
           </Form.Item>
 
